@@ -1,0 +1,101 @@
+taxon_id,scientific_name,common_name,observations
+6930,Anas platyrhynchos,Mallard,318866
+12716,Turdus merula,Eurasian Blackbird,186291
+203153,Parus major,Great Tit,184535
+4954,Ardea cinerea,Grey Heron,183404
+144510,Chroicocephalus ridibundus,Black-headed Gull,153761
+3048,Columba palumbus,Common Wood-Pigeon,153041
+13094,Erithacus rubecula,European Robin,151338
+10070,Fringilla coelebs,Common Chaffinch,151215
+891696,Pica pica,Eurasian Magpie,145056
+3017,Columba livia,Rock Pigeon,144390
+13858,Passer domesticus,House Sparrow,140716
+13695,Motacilla alba,White Wagtail,140003
+204472,Buteo buteo,Common Buzzard,138733
+144849,Cyanistes caeruleus,Eurasian Blue Tit,138665
+482,Fulica atra,Eurasian Coot,131746
+6921,Cygnus olor,Mute Swan,131491
+144757,Corvus cornix,Hooded Crow,119081
+17871,Dendrocopos major,Great Spotted Woodpecker,117384
+4270,Phalacrocorax carbo,Great Cormorant,116230
+14850,Sturnus vulgaris,European Starling,113567
+472766,Falco tinnunculus,Eurasian Kestrel,103991
+201282,Gallinula chloropus,Eurasian Moorhen,94205
+9398,Carduelis carduelis,European Goldfinch,93843
+4208,Podiceps cristatus,Great Crested Grebe,90360
+336399,Coloeus monedula,Eurasian Jackdaw,86724
+8088,Garrulus glandarius,Eurasian Jay,85274
+12707,Turdus pilaris,Fieldfare,79197
+13000,Phoenicurus ochruros,Black Redstart,78684
+13851,Passer montanus,Eurasian Tree Sparrow,75744
+7018,Anser anser,Greylag Goose,75600
+11901,Hirundo rustica,Barn Swallow,74214
+204496,Corvus corone,Carrion Crow,74103
+4733,Ciconia ciconia,White Stork,73856
+145360,Chloris chloris,European Greenfinch,73446
+204533,Larus argentatus,European Herring Gull,72751
+7046,Aythya fuligula,Tufted Duck,70848
+2969,Streptopelia decaocto,Eurasian Collared-Dove,67028
+14824,Sitta europaea,Eurasian Nuthatch,66195
+4943,Egretta garzetta,Little Egret,61925
+59202,Larus michahellis,Yellow-legged Gull,61571
+7278,Aegithalos caudatus,Long-tailed Tit,60053
+9462,Pyrrhula pyrrhula,Eurasian Bullfinch,59901
+201192,Saxicola rubicola,European Stonechat,59597
+4857,Vanellus vanellus,Northern Lapwing,54757
+5268,Milvus migrans,Black Kite,54055
+144455,Ardea alba,Great Egret,52213
+5173,Circus aeruginosus,Western Marsh Harrier,51889
+12748,Turdus philomelos,Song Thrush,51293
+5267,Milvus milvus,Red Kite,50927
+117016,Phylloscopus collybita,Common Chiffchaff,50196
+7089,Branta canadensis,Canada Goose,50098
+8029,Corvus frugilegus,Rook,48754
+558634,Linaria cannabina,Eurasian Linnet,48429
+8010,Corvus corax,Common Raven,47400
+72486,Alopochen aegyptiaca,Egyptian Goose,46410
+981,Phasianus colchicus,Ring-necked Pheasant,44598
+9195,Emberiza citrinella,Yellowhammer,44303
+12038,Lanius collurio,Red-backed Shrike,44276
+4843,Haematopus ostralegus,Eurasian Oystercatcher,41957
+7004,Mergus merganser,Common Merganser,41195
+6937,Anas crecca,Green-winged Teal,41084
+15282,Sylvia atricapilla,Eurasian Blackcap,40686
+558439,Mareca strepera,Gadwall,40012
+12822,Oenanthe oenanthe,Northern Wheatear,39075
+4356,Larus canus,Common Gull,38466
+5106,Accipiter nisus,Eurasian Sparrowhawk,38061
+1720562,Schoeniclus schoeniclus,Reed Bunting,37819
+6990,Bucephala clangula,Common Goldeneye,34330
+4381,Larus fuscus,Lesser Black-backed Gull,34308
+1720028,Nannus troglodytes,Eurasian Wren,34279
+7045,Aythya ferina,Common Pochard,34275
+4450,Sterna hirundo,Common Tern,33982
+204545,Motacilla flava,Western Yellow Wagtail,33907
+3978,Actitis hypoleucos,Common Sandpiper,33583
+12971,Muscicapa striata,Spotted Flycatcher,33024
+4237,Tachybaptus ruficollis,Little Grebe,32989
+2599,Alcedo atthis,Common Kingfisher,32817
+5366,Gyps fulvus,Eurasian Griffon,32805
+558438,Spatula clypeata,Northern Shoveler,32466
+41,Grus grus,Common Crane,32313
+3879,Tringa totanus,Common Redshank,31977
+13988,Prunella modularis,Dunnock,31865
+144823,Periparus ater,Coal Tit,31503
+145303,Spinus spinus,Eurasian Siskin,31296
+7067,Tadorna tadorna,Common Shelduck,31086
+12908,Saxicola rubetra,Whinchat,30584
+13688,Motacilla cinerea,Grey Wagtail,30345
+558441,Mareca penelope,Eurasian Wigeon,29975
+1289470,Curruca communis,Greater Whitethroat,29436
+9236,Serinus serinus,European Serin,29200
+64705,Delichon urbicum,Western House Martin,28559
+4835,Himantopus himantopus,Black-winged Stilt,27983
+13729,Anthus pratensis,Meadow Pipit,27693
+73222,Phoenicopterus roseus,Greater Flamingo,27189
+2191,Merops apiaster,European Bee-eater,26474
+204512,Ficedula hypoleuca,European Pied Flycatcher,26333
+12992,Phoenicurus phoenicurus,Common Redstart,25698
+20969,Upupa epops,Common Hoopoe,25559
+5309,Haliaeetus albicilla,White-tailed Eagle,25377
+144243,Picus viridis,Eurasian Green Woodpecker,25247

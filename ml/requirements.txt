@@ -1,0 +1,13 @@
+# Data pipeline
+requests>=2.31
+Pillow>=10.0
+
+# Training + export
+# (for a CPU-only local install: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu)
+torch>=2.6
+torchvision
+timm>=1.0
+onnx
+onnxscript
+onnxruntime
+numpy
