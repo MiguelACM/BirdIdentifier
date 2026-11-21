@@ -7,6 +7,8 @@
 
 import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/ort.wasm.min.mjs";
 import { LANGUAGES, applyStaticText, initialLanguage, saveLanguage, translate } from "./i18n.js";
+import { readExif } from "./exif.js";
+import { RARE_BELOW, applyPrior, countryAt, loadPriors, priorFor } from "./location.js";
 
 const MODEL_DIR = "model";
 // 8-bit version: 4x smaller download than model.onnx and only ~0.5-1% less accurate.
@@ -35,6 +37,10 @@ const els = {
   exampleVerdict: $("example-verdict"),
   cropBox: $("crop-box"),
   cropReset: $("crop-reset"),
+  location: $("location"),
+  countrySelect: $("country-select"),
+  monthSelect: $("month-select"),
+  locationNote: $("location-note"),
 };
 
 let session, labels, config, examples = [];
@@ -65,6 +71,7 @@ async function setLanguage(newLang) {
   }
   setStatus(status.key, status.vars);
   if (labels) renderSpeciesList();
+  renderLocationControls();
   renderExamples();
   if (current.bitmap) showExampleCredit(current.example);
   if (lastRun) showResults(lastRun.probs, lastRun.ms); // re-render, no need to re-run the model
@@ -100,6 +107,10 @@ async function loadModel() {
     fetch(`${MODEL_DIR}/config.json`).then((r) => r.json()),
   ]);
   renderSpeciesList();
+  loadPriors(labels).then((codes) => {
+    countries = codes;
+    renderLocationControls();
+  }).catch((err) => console.warn("Location hints unavailable:", err));
 
   const bytes = await fetchWithProgress(`${MODEL_DIR}/${MODEL_FILE}`, (f) => {
     els.progress.value = f;
@@ -223,7 +234,8 @@ async function classify(file, example = null) {
   els.preview.src = URL.createObjectURL(file);
   els.result.hidden = false;
   showExampleCredit(example);
-  await els.preview.decode().catch(() => {});
+  Object.assign(place, await placeForPhoto(file, example));
+  renderLocationControls();
   renderCropBox();
   await runModel();
 }
@@ -250,8 +262,13 @@ async function runModel() {
 }
 
 function showResults(probs, ms) {
-  const top = [...probs.keys()].sort((a, b) => probs[b] - probs[a]).slice(0, TOP_K);
-  const results = top.map((i) => ({ ...labels[i], p: probs[i] }));
+  // Re-rank with the location + season prior (if a country is set)
+  const prior = priorFor(place.country, place.month);
+  const adjusted = applyPrior(probs, prior);
+  const top = [...adjusted.keys()].sort((a, b) => adjusted[b] - adjusted[a]).slice(0, TOP_K);
+  const results = top.map((i) => ({ ...labels[i], p: adjusted[i], prior: prior?.[i] }));
+  const photoTop = probs.indexOf(Math.max(...probs));
+  els.locationNote.textContent = locationNote(photoTop === top[0] ? null : labels[photoTop]);
 
   els.uncertain.hidden = results[0].p >= UNCERTAIN_BELOW;
   els.exampleVerdict.hidden = true;
@@ -401,6 +418,7 @@ function renderPrediction(r) {
         <div class="bar"><span></span></div>
         <span class="pct"></span>
       </div>
+      <div class="rare" hidden></div>
       <div class="links"><a target="_blank" rel="noopener">iNaturalist</a></div>
     </div>`;
   li.querySelector(".common").textContent = speciesName(r.taxon_id, r.common_name);
@@ -408,6 +426,14 @@ function renderPrediction(r) {
   li.querySelector(".bar > span").style.width = `${(r.p * 100).toFixed(1)}%`;
   li.querySelector(".pct").textContent = `${(r.p * 100).toFixed(r.p < 0.1 ? 1 : 0)}%`;
   li.querySelector("a").href = `https://www.inaturalist.org/taxa/${r.taxon_id}`;
+  if (r.prior !== undefined && r.prior < RARE_BELOW) {
+    const rare = li.querySelector(".rare");
+    const country = countryName(place.country);
+    rare.textContent = place.month
+      ? t("rareMonth", { country, month: monthName(place.month) })
+      : t("rareYear", { country });
+    rare.hidden = false;
+  }
   return li;
 }
 
@@ -438,6 +464,95 @@ async function addReferencePhotos(results) {
   } catch {
     // Reference photos are a nice-to-have; ignore network errors
   }
+}
+
+// ------------------------------------------------------------------ location + season
+
+// Where and when the current photo was taken. Comes from the photo's EXIF data,
+// an example's iNaturalist observation, or the visitor's own choice. Off (no
+// country) until one of those sets it; only a country picked by hand is remembered.
+const COUNTRY_KEY = "bird-identifier-country";
+let countries = []; // supported country codes, once priors.json has loaded
+const currentMonth = () => new Date().getMonth() + 1;
+const place = { country: savedCountry(), month: currentMonth(), source: null, what: null, outside: false };
+
+function savedCountry() {
+  try { return localStorage.getItem(COUNTRY_KEY) || ""; } catch { return ""; }
+}
+function saveCountry(code) {
+  try {
+    if (code) localStorage.setItem(COUNTRY_KEY, code);
+    else localStorage.removeItem(COUNTRY_KEY);
+  } catch { /* storage may be blocked */ }
+}
+
+// Russia is only covered west of the Urals, so say so in its name
+const countryName = (code) => code === "RU" ? t("countryRU")
+  : new Intl.DisplayNames([lang], { type: "region" }).of(code);
+const monthName = (m) => new Intl.DateTimeFormat(lang, { month: "long" }).format(new Date(2000, m - 1, 15));
+const capitalise = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+async function placeForPhoto(file, example) {
+  if (example?.country) {
+    const known = countries.includes(example.country);
+    return { country: known ? example.country : "", month: example.month, source: "observation",
+             what: null, outside: !known };
+  }
+  const exif = await readExif(file);
+  const result = { country: savedCountry(), month: exif.month ?? currentMonth(), source: null, what: null, outside: false };
+  let fromGps = false;
+  if (exif.lat !== null && countries.length) {
+    const code = await countryAt(exif.lat, exif.lon).catch(() => "");
+    if (countries.includes(code)) {
+      result.country = code;
+      fromGps = true;
+    } else if (code === "-") {
+      result.country = ""; // outside the covered countries: priors would mislead
+      result.outside = true;
+    }
+  }
+  if (fromGps || exif.month) {
+    result.source = "photo";
+    result.what = fromGps && exif.month ? "fromPhotoBoth" : fromGps ? "fromPhotoGps" : "fromPhotoDate";
+  }
+  return result;
+}
+
+function renderLocationControls() {
+  els.location.hidden = !countries.length;
+  if (!countries.length) return;
+  const named = countries.map((code) => ({ code, name: countryName(code) }))
+    .sort((a, b) => a.name.localeCompare(b.name, lang));
+  els.countrySelect.replaceChildren(
+    new Option(t("countryNone"), ""), ...named.map(({ code, name }) => new Option(name, code)));
+  els.countrySelect.value = place.country;
+  els.monthSelect.replaceChildren(new Option(t("monthAny"), ""),
+    ...Array.from({ length: 12 }, (_, i) => new Option(capitalise(monthName(i + 1)), String(i + 1))));
+  els.monthSelect.value = place.month ? String(place.month) : "";
+  els.monthSelect.disabled = !place.country;
+}
+
+function locationNote(photoOnlyTop) {
+  if (!place.country) return t(place.outside ? "outsideArea" : "locationOff");
+  const parts = [];
+  if (place.source === "observation") parts.push(t("fromObservation"));
+  if (place.source === "photo") parts.push(t("fromPhoto", { what: t(place.what) }));
+  parts.push(t("locationOn"));
+  if (photoOnlyTop) {
+    parts.push(t("withoutLocation", { species: speciesName(photoOnlyTop.taxon_id, photoOnlyTop.common_name) }));
+  }
+  return parts.join(" ");
+}
+
+function onPlaceChange() {
+  Object.assign(place, {
+    country: els.countrySelect.value,
+    month: Number(els.monthSelect.value) || null,
+    source: null, // chosen by hand now
+    outside: false,
+  });
+  renderLocationControls();
+  if (lastRun) showResults(lastRun.probs, lastRun.ms); // re-rank, no need to re-run the model
 }
 
 // ------------------------------------------------------------------ input handling
@@ -475,6 +590,11 @@ els.cropBox.addEventListener("pointerup", endDrag);
 els.cropBox.addEventListener("pointercancel", endDrag);
 els.cropBox.addEventListener("keydown", onCropKey);
 els.cropReset.addEventListener("click", resetCrop);
+els.countrySelect.addEventListener("change", () => {
+  saveCountry(els.countrySelect.value); // remember a country picked by hand
+  onPlaceChange();
+});
+els.monthSelect.addEventListener("change", onPlaceChange);
 
 for (const btn of document.querySelectorAll(".lang-switch button")) {
   btn.addEventListener("click", () => {

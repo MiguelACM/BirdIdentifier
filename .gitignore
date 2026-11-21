@@ -8,6 +8,9 @@ venv/
 # Datasets and model artifacts (too large / not ours to redistribute)
 ml/data/raw/
 ml/data/splits/
+ml/data/gbif/
+ml/data/eval/
+ml/data/geo/
 ml/data/*.log
 ml/runs/
 ml/dist/

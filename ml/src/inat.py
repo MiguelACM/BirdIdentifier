@@ -20,7 +20,8 @@ AVES_TAXON_ID = 3
 
 
 class INatClient:
-    def __init__(self, min_interval: float = 1.0, max_retries: int = 5):
+    def __init__(self, min_interval: float = 1.0, max_retries: int = 5, api_url: str = API_URL):
+        self.api_url = api_url  # also used for the GBIF API, which has the same needs
         self.session = requests.Session()
         self.session.headers["User-Agent"] = USER_AGENT
         self.min_interval = min_interval
@@ -39,7 +40,7 @@ class INatClient:
             self._throttle()
             backoff = 2 ** attempt * 5
             try:
-                resp = self.session.get(f"{API_URL}/{path}", params=params, timeout=30)
+                resp = self.session.get(f"{self.api_url}/{path}", params=params, timeout=30)
             except (requests.ConnectionError, requests.Timeout) as e:
                 print(f"  network error ({type(e).__name__}), retrying in {backoff}s...")
                 time.sleep(backoff)

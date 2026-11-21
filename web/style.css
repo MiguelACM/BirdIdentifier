@@ -221,6 +221,29 @@ a { color: var(--accent); }
   cursor: pointer;
 }
 
+/* ---- location + season */
+.location {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.location-row { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.location label { display: flex; align-items: center; gap: 6px; font-size: 0.875rem; color: var(--muted); }
+.location select {
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  max-width: 210px;
+}
+.location select:disabled { opacity: 0.5; }
+#location-note { margin: 6px 0 0; }
+.rare { color: var(--warn-text); font-size: 0.8rem; }
+
 .notice {
   margin: 0 0 12px;
   padding: 10px 12px;

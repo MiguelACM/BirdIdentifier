@@ -16,7 +16,7 @@ running **entirely in the browser**.
 - [x] Train on a GPU (Kaggle) and evaluate: **75.2% top-1, 90.1% top-5** on the test set
 - [ ] Improve: more epochs, higher resolution (288px), more photos per species
 - [x] Web app: upload a photo and see the top 5 species, running locally in the browser
-- [ ] Re-rank predictions by location and season
+- [x] Re-rank predictions by location and season (GBIF sightings per country and month)
 - [ ] Scale up from 100 species to all of Europe
 
 ## Project layout
@@ -31,6 +31,11 @@ ml/
     package_dataset.py  # bundle data + code into a zip for Kaggle
     train.py            # step 4: fine-tune a timm model
     export_onnx.py      # step 5: export to ONNX for the browser
+    fetch_species_names.py  # species names in other languages (web/i18n/)
+    fetch_gbif_priors.py    # location + season priors from GBIF (web/priors.json)
+    make_country_grid.py    # GPS -> country lookup grid (web/country-grid.json)
+    predict_split.py    # save the model's predictions on a split, for evaluation
+    eval_priors.py      # measure the priors and pick their weight
   notebooks/
     train_kaggle.ipynb  # runs train + export on a free Kaggle GPU
   data/
@@ -40,6 +45,9 @@ ml/
 web/
   index.html, style.css, app.js   # static site, no build step
   i18n.js, i18n/        # page text (EN/PT) and Portuguese species names
+  location.js, exif.js  # location + season re-ranking, EXIF GPS/date reader
+  priors.json           # species share of GBIF sightings per country and month
+  country-grid.json     # 0.1° grid for turning GPS coordinates into a country
   examples.json         # example photos (test set, CC0/CC BY, loaded from iNaturalist)
   model/                # committed: model.int8.onnx (15 MB), labels.json, config.json
 ```
@@ -125,6 +133,50 @@ an EN | PT switch at the top remembers the visitor's choice. Page text lives in
 via `python -m src.fetch_species_names --locale pt --place 7122 --lang pt`, which writes
 `web/i18n/species.pt.json`. In Portuguese, Wikipedia links point to pt.wikipedia.org.
 
+### Location and season
+
+A photo alone can't separate some look-alikes, but where and when it was taken often can:
+a large pale gull in Portugal is far more likely to be a Yellow-legged than a Herring Gull,
+and a swallow in Germany in January is unlikely. Once a country is set, the page re-ranks
+the model's guesses with how often each species is recorded there in that month:
+
+    p(species | photo, place, month)  ∝  p_model(species | photo) × p_prior(species | place, month)^w
+
+- **Where the location comes from:** the photo's own EXIF GPS position and date, when it has
+  them (read in the browser by `web/exif.js`, so they never leave the device), or a country
+  and month picked by the visitor. A hand-picked country is remembered; the month defaults to
+  the current one. Hints are off until a country is known. Example photos use the country
+  and month of their iNaturalist observation.
+- **Priors:** `python -m src.fetch_gbif_priors` asks [GBIF](https://www.gbif.org/) for the number
+  of records of each species in each of 52 European countries and each month (624 requests),
+  and stores each species' share of the country-month total in `web/priors.json` (200 KB,
+  ~80 KB compressed). Using shares rather than raw counts removes most of the "more birders
+  in Britain" effect. Months with few records lean on the country's whole year, and small
+  countries on Europe as a whole (additive smoothing). Russia only counts records west of the
+  Urals (60°E), so Siberian birds don't skew European Russia. Turkey is left out, as almost
+  all of it is in Asia.
+- **GPS to country:** `python -m src.make_country_grid` rasterises
+  [Natural Earth](https://www.naturalearthdata.com/) country borders onto a 0.1° grid
+  (34 KB, run-length encoded), with sea cells near a coast given to the nearest country, so
+  no online reverse-geocoding service is needed.
+- **Display:** species with few records there and then get a "few records" note, and if the
+  location changed the top match, the page says what the photo alone would have picked.
+
+**Does it help?** `python -m src.eval_priors` uses each test photo's real iNaturalist location
+and date. It picks the weight `w` on the validation set (best at 0.7; anything from 0.4 to 0.8
+is within 0.3 points), then measures on the test set (int8 model):
+
+| test set (3049 photos) | top-1 | top-5 |
+|---|---|---|
+| photo only | 74.5% | 90.2% |
+| + country (whole year) | 76.2% | 90.3% |
+| + country and month | **76.6%** | **90.7%** |
+
+All but 5 test photos were taken in a covered country (22% of them in European Russia, which
+the first version left out: adding it took the gain from +1.6 to +2.1 points). A weight above
+1 starts to hurt:
+the prior then overrules clear photos of birds that are simply rare in that place.
+
 Six **example photos** (`web/examples.json`) let visitors try it without a photo of their own.
 They come from the test set, so the model never saw them during training, and are CC0 / CC BY
 licensed, credited and loaded from iNaturalist. Five are correct; one (a Herring Gull taken
@@ -153,6 +205,8 @@ changes on `main`.
 
 Photos come from iNaturalist users under a mix of licenses (CC0, CC BY, CC BY-NC,
 and some all-rights-reserved). They are **not** included in this repository.
+Location priors are derived from occurrence counts on [GBIF.org](https://www.gbif.org/), and
+country borders come from Natural Earth (public domain).
 The scripts download them for personal, non-commercial study, and
 `data/raw/manifest.csv` records the license and author of every image.
 Any trained model weights shared from this project are for non-commercial use only.

@@ -6,7 +6,9 @@
     "thumb": "https://inaturalist-open-data.s3.amazonaws.com/photos/764805013/small.jpg",
     "observation": "https://www.inaturalist.org/observations/415353619",
     "license": "cc0",
-    "attribution": "no rights reserved"
+    "attribution": "no rights reserved",
+    "country": "GB",
+    "month": 11
   },
   {
     "taxon_id": 2599,
@@ -15,7 +17,9 @@
     "thumb": "https://inaturalist-open-data.s3.amazonaws.com/photos/762013271/small.jpg",
     "observation": "https://www.inaturalist.org/observations/413977006",
     "license": "cc-by",
-    "attribution": "(c) Cenaida, some rights reserved (CC BY)"
+    "attribution": "(c) Cenaida, some rights reserved (CC BY)",
+    "country": "MT",
+    "month": 10
   },
   {
     "taxon_id": 20969,
@@ -24,7 +28,9 @@
     "thumb": "https://inaturalist-open-data.s3.amazonaws.com/photos/752246733/small.jpg",
     "observation": "https://www.inaturalist.org/observations/409157910",
     "license": "cc-by",
-    "attribution": "(c) Nico Hernandez, some rights reserved (CC BY)"
+    "attribution": "(c) Nico Hernandez, some rights reserved (CC BY)",
+    "country": "ES",
+    "month": 10
   },
   {
     "taxon_id": 2191,
@@ -33,7 +39,9 @@
     "thumb": "https://inaturalist-open-data.s3.amazonaws.com/photos/757170949/small.jpg",
     "observation": "https://www.inaturalist.org/observations/411576442",
     "license": "cc-by",
-    "attribution": "(c) Marcin Zuwała, some rights reserved (CC BY)"
+    "attribution": "(c) Marcin Zuwała, some rights reserved (CC BY)",
+    "country": "PL",
+    "month": 7
   },
   {
     "taxon_id": 9398,
@@ -42,7 +50,9 @@
     "thumb": "https://inaturalist-open-data.s3.amazonaws.com/photos/763458040/small.jpg",
     "observation": "https://www.inaturalist.org/observations/414693685",
     "license": "cc-by",
-    "attribution": "(c) Вячеслав Юсупов, some rights reserved (CC BY)"
+    "attribution": "(c) Вячеслав Юсупов, some rights reserved (CC BY)",
+    "country": "RU",
+    "month": 11
   },
   {
     "taxon_id": 204533,
@@ -51,6 +61,8 @@
     "thumb": "https://inaturalist-open-data.s3.amazonaws.com/photos/764734664/small.jpg",
     "observation": "https://www.inaturalist.org/observations/415319979",
     "license": "cc-by",
-    "attribution": "(c) Jess Hughes, some rights reserved (CC BY)"
+    "attribution": "(c) Jess Hughes, some rights reserved (CC BY)",
+    "country": "GB",
+    "month": 11
   }
 ]

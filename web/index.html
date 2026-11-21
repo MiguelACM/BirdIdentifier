@@ -62,6 +62,19 @@
       </figure>
       <div class="predictions">
         <h2 data-i18n="topMatches">Top matches</h2>
+        <div id="location" class="location" hidden>
+          <div class="location-row">
+            <label>
+              <span data-i18n="countryLabel">Country</span>
+              <select id="country-select"></select>
+            </label>
+            <label>
+              <span data-i18n="monthLabel">Month</span>
+              <select id="month-select"></select>
+            </label>
+          </div>
+          <p id="location-note" class="hint"></p>
+        </div>
         <p id="example-verdict" class="notice" hidden></p>
         <p id="uncertain" class="notice" hidden data-i18n="uncertain">
           Not very confident. The bird may be small, far away or partly hidden,
@@ -82,7 +95,8 @@
     <p data-i18n-html="footer">A learning project: a <code>convnext_nano</code> model fine-tuned on
       research-grade photos from <a href="https://www.inaturalist.org/">iNaturalist</a>,
       running with <a href="https://onnxruntime.ai/">ONNX Runtime Web</a>.
-      Reference photos come from iNaturalist.</p>
+      Reference photos come from iNaturalist; location hints use sightings from
+      <a href="https://www.gbif.org/">GBIF</a>.</p>
   </footer>
 
   <script type="module" src="app.js"></script>
