@@ -6,7 +6,7 @@ running **entirely in the browser**.
 **Live demo:** https://miguelacm.github.io/BirdIdentifier/
 
 - **ML:** PyTorch + [timm](https://github.com/huggingface/pytorch-image-models), fine-tuning a pretrained image model, exported to ONNX
-- **Web:** ONNX Runtime Web (WebGPU / WASM), so photos never leave the device
+- **Web:** ONNX Runtime Web (WebAssembly), so photos never leave the device
 - **Data:** research-grade bird observations from [iNaturalist](https://www.inaturalist.org/)
 
 ## Roadmap
