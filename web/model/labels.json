@@ -1,0 +1,602 @@
+[
+  {
+    "index": 0,
+    "taxon_id": 6930,
+    "scientific_name": "Anas platyrhynchos",
+    "common_name": "Mallard"
+  },
+  {
+    "index": 1,
+    "taxon_id": 12716,
+    "scientific_name": "Turdus merula",
+    "common_name": "Eurasian Blackbird"
+  },
+  {
+    "index": 2,
+    "taxon_id": 203153,
+    "scientific_name": "Parus major",
+    "common_name": "Great Tit"
+  },
+  {
+    "index": 3,
+    "taxon_id": 4954,
+    "scientific_name": "Ardea cinerea",
+    "common_name": "Grey Heron"
+  },
+  {
+    "index": 4,
+    "taxon_id": 144510,
+    "scientific_name": "Chroicocephalus ridibundus",
+    "common_name": "Black-headed Gull"
+  },
+  {
+    "index": 5,
+    "taxon_id": 3048,
+    "scientific_name": "Columba palumbus",
+    "common_name": "Common Wood-Pigeon"
+  },
+  {
+    "index": 6,
+    "taxon_id": 13094,
+    "scientific_name": "Erithacus rubecula",
+    "common_name": "European Robin"
+  },
+  {
+    "index": 7,
+    "taxon_id": 10070,
+    "scientific_name": "Fringilla coelebs",
+    "common_name": "Common Chaffinch"
+  },
+  {
+    "index": 8,
+    "taxon_id": 891696,
+    "scientific_name": "Pica pica",
+    "common_name": "Eurasian Magpie"
+  },
+  {
+    "index": 9,
+    "taxon_id": 3017,
+    "scientific_name": "Columba livia",
+    "common_name": "Rock Pigeon"
+  },
+  {
+    "index": 10,
+    "taxon_id": 13858,
+    "scientific_name": "Passer domesticus",
+    "common_name": "House Sparrow"
+  },
+  {
+    "index": 11,
+    "taxon_id": 13695,
+    "scientific_name": "Motacilla alba",
+    "common_name": "White Wagtail"
+  },
+  {
+    "index": 12,
+    "taxon_id": 204472,
+    "scientific_name": "Buteo buteo",
+    "common_name": "Common Buzzard"
+  },
+  {
+    "index": 13,
+    "taxon_id": 144849,
+    "scientific_name": "Cyanistes caeruleus",
+    "common_name": "Eurasian Blue Tit"
+  },
+  {
+    "index": 14,
+    "taxon_id": 482,
+    "scientific_name": "Fulica atra",
+    "common_name": "Eurasian Coot"
+  },
+  {
+    "index": 15,
+    "taxon_id": 6921,
+    "scientific_name": "Cygnus olor",
+    "common_name": "Mute Swan"
+  },
+  {
+    "index": 16,
+    "taxon_id": 144757,
+    "scientific_name": "Corvus cornix",
+    "common_name": "Hooded Crow"
+  },
+  {
+    "index": 17,
+    "taxon_id": 17871,
+    "scientific_name": "Dendrocopos major",
+    "common_name": "Great Spotted Woodpecker"
+  },
+  {
+    "index": 18,
+    "taxon_id": 4270,
+    "scientific_name": "Phalacrocorax carbo",
+    "common_name": "Great Cormorant"
+  },
+  {
+    "index": 19,
+    "taxon_id": 14850,
+    "scientific_name": "Sturnus vulgaris",
+    "common_name": "European Starling"
+  },
+  {
+    "index": 20,
+    "taxon_id": 472766,
+    "scientific_name": "Falco tinnunculus",
+    "common_name": "Eurasian Kestrel"
+  },
+  {
+    "index": 21,
+    "taxon_id": 201282,
+    "scientific_name": "Gallinula chloropus",
+    "common_name": "Eurasian Moorhen"
+  },
+  {
+    "index": 22,
+    "taxon_id": 9398,
+    "scientific_name": "Carduelis carduelis",
+    "common_name": "European Goldfinch"
+  },
+  {
+    "index": 23,
+    "taxon_id": 4208,
+    "scientific_name": "Podiceps cristatus",
+    "common_name": "Great Crested Grebe"
+  },
+  {
+    "index": 24,
+    "taxon_id": 336399,
+    "scientific_name": "Coloeus monedula",
+    "common_name": "Eurasian Jackdaw"
+  },
+  {
+    "index": 25,
+    "taxon_id": 8088,
+    "scientific_name": "Garrulus glandarius",
+    "common_name": "Eurasian Jay"
+  },
+  {
+    "index": 26,
+    "taxon_id": 12707,
+    "scientific_name": "Turdus pilaris",
+    "common_name": "Fieldfare"
+  },
+  {
+    "index": 27,
+    "taxon_id": 13000,
+    "scientific_name": "Phoenicurus ochruros",
+    "common_name": "Black Redstart"
+  },
+  {
+    "index": 28,
+    "taxon_id": 13851,
+    "scientific_name": "Passer montanus",
+    "common_name": "Eurasian Tree Sparrow"
+  },
+  {
+    "index": 29,
+    "taxon_id": 7018,
+    "scientific_name": "Anser anser",
+    "common_name": "Greylag Goose"
+  },
+  {
+    "index": 30,
+    "taxon_id": 11901,
+    "scientific_name": "Hirundo rustica",
+    "common_name": "Barn Swallow"
+  },
+  {
+    "index": 31,
+    "taxon_id": 204496,
+    "scientific_name": "Corvus corone",
+    "common_name": "Carrion Crow"
+  },
+  {
+    "index": 32,
+    "taxon_id": 4733,
+    "scientific_name": "Ciconia ciconia",
+    "common_name": "White Stork"
+  },
+  {
+    "index": 33,
+    "taxon_id": 145360,
+    "scientific_name": "Chloris chloris",
+    "common_name": "European Greenfinch"
+  },
+  {
+    "index": 34,
+    "taxon_id": 204533,
+    "scientific_name": "Larus argentatus",
+    "common_name": "European Herring Gull"
+  },
+  {
+    "index": 35,
+    "taxon_id": 7046,
+    "scientific_name": "Aythya fuligula",
+    "common_name": "Tufted Duck"
+  },
+  {
+    "index": 36,
+    "taxon_id": 2969,
+    "scientific_name": "Streptopelia decaocto",
+    "common_name": "Eurasian Collared-Dove"
+  },
+  {
+    "index": 37,
+    "taxon_id": 14824,
+    "scientific_name": "Sitta europaea",
+    "common_name": "Eurasian Nuthatch"
+  },
+  {
+    "index": 38,
+    "taxon_id": 4943,
+    "scientific_name": "Egretta garzetta",
+    "common_name": "Little Egret"
+  },
+  {
+    "index": 39,
+    "taxon_id": 59202,
+    "scientific_name": "Larus michahellis",
+    "common_name": "Yellow-legged Gull"
+  },
+  {
+    "index": 40,
+    "taxon_id": 7278,
+    "scientific_name": "Aegithalos caudatus",
+    "common_name": "Long-tailed Tit"
+  },
+  {
+    "index": 41,
+    "taxon_id": 9462,
+    "scientific_name": "Pyrrhula pyrrhula",
+    "common_name": "Eurasian Bullfinch"
+  },
+  {
+    "index": 42,
+    "taxon_id": 201192,
+    "scientific_name": "Saxicola rubicola",
+    "common_name": "European Stonechat"
+  },
+  {
+    "index": 43,
+    "taxon_id": 4857,
+    "scientific_name": "Vanellus vanellus",
+    "common_name": "Northern Lapwing"
+  },
+  {
+    "index": 44,
+    "taxon_id": 5268,
+    "scientific_name": "Milvus migrans",
+    "common_name": "Black Kite"
+  },
+  {
+    "index": 45,
+    "taxon_id": 144455,
+    "scientific_name": "Ardea alba",
+    "common_name": "Great Egret"
+  },
+  {
+    "index": 46,
+    "taxon_id": 5173,
+    "scientific_name": "Circus aeruginosus",
+    "common_name": "Western Marsh Harrier"
+  },
+  {
+    "index": 47,
+    "taxon_id": 12748,
+    "scientific_name": "Turdus philomelos",
+    "common_name": "Song Thrush"
+  },
+  {
+    "index": 48,
+    "taxon_id": 5267,
+    "scientific_name": "Milvus milvus",
+    "common_name": "Red Kite"
+  },
+  {
+    "index": 49,
+    "taxon_id": 117016,
+    "scientific_name": "Phylloscopus collybita",
+    "common_name": "Common Chiffchaff"
+  },
+  {
+    "index": 50,
+    "taxon_id": 7089,
+    "scientific_name": "Branta canadensis",
+    "common_name": "Canada Goose"
+  },
+  {
+    "index": 51,
+    "taxon_id": 8029,
+    "scientific_name": "Corvus frugilegus",
+    "common_name": "Rook"
+  },
+  {
+    "index": 52,
+    "taxon_id": 558634,
+    "scientific_name": "Linaria cannabina",
+    "common_name": "Eurasian Linnet"
+  },
+  {
+    "index": 53,
+    "taxon_id": 8010,
+    "scientific_name": "Corvus corax",
+    "common_name": "Common Raven"
+  },
+  {
+    "index": 54,
+    "taxon_id": 72486,
+    "scientific_name": "Alopochen aegyptiaca",
+    "common_name": "Egyptian Goose"
+  },
+  {
+    "index": 55,
+    "taxon_id": 981,
+    "scientific_name": "Phasianus colchicus",
+    "common_name": "Ring-necked Pheasant"
+  },
+  {
+    "index": 56,
+    "taxon_id": 9195,
+    "scientific_name": "Emberiza citrinella",
+    "common_name": "Yellowhammer"
+  },
+  {
+    "index": 57,
+    "taxon_id": 12038,
+    "scientific_name": "Lanius collurio",
+    "common_name": "Red-backed Shrike"
+  },
+  {
+    "index": 58,
+    "taxon_id": 4843,
+    "scientific_name": "Haematopus ostralegus",
+    "common_name": "Eurasian Oystercatcher"
+  },
+  {
+    "index": 59,
+    "taxon_id": 7004,
+    "scientific_name": "Mergus merganser",
+    "common_name": "Common Merganser"
+  },
+  {
+    "index": 60,
+    "taxon_id": 6937,
+    "scientific_name": "Anas crecca",
+    "common_name": "Green-winged Teal"
+  },
+  {
+    "index": 61,
+    "taxon_id": 15282,
+    "scientific_name": "Sylvia atricapilla",
+    "common_name": "Eurasian Blackcap"
+  },
+  {
+    "index": 62,
+    "taxon_id": 558439,
+    "scientific_name": "Mareca strepera",
+    "common_name": "Gadwall"
+  },
+  {
+    "index": 63,
+    "taxon_id": 12822,
+    "scientific_name": "Oenanthe oenanthe",
+    "common_name": "Northern Wheatear"
+  },
+  {
+    "index": 64,
+    "taxon_id": 4356,
+    "scientific_name": "Larus canus",
+    "common_name": "Common Gull"
+  },
+  {
+    "index": 65,
+    "taxon_id": 5106,
+    "scientific_name": "Accipiter nisus",
+    "common_name": "Eurasian Sparrowhawk"
+  },
+  {
+    "index": 66,
+    "taxon_id": 1720562,
+    "scientific_name": "Schoeniclus schoeniclus",
+    "common_name": "Reed Bunting"
+  },
+  {
+    "index": 67,
+    "taxon_id": 6990,
+    "scientific_name": "Bucephala clangula",
+    "common_name": "Common Goldeneye"
+  },
+  {
+    "index": 68,
+    "taxon_id": 4381,
+    "scientific_name": "Larus fuscus",
+    "common_name": "Lesser Black-backed Gull"
+  },
+  {
+    "index": 69,
+    "taxon_id": 1720028,
+    "scientific_name": "Nannus troglodytes",
+    "common_name": "Eurasian Wren"
+  },
+  {
+    "index": 70,
+    "taxon_id": 7045,
+    "scientific_name": "Aythya ferina",
+    "common_name": "Common Pochard"
+  },
+  {
+    "index": 71,
+    "taxon_id": 4450,
+    "scientific_name": "Sterna hirundo",
+    "common_name": "Common Tern"
+  },
+  {
+    "index": 72,
+    "taxon_id": 204545,
+    "scientific_name": "Motacilla flava",
+    "common_name": "Western Yellow Wagtail"
+  },
+  {
+    "index": 73,
+    "taxon_id": 3978,
+    "scientific_name": "Actitis hypoleucos",
+    "common_name": "Common Sandpiper"
+  },
+  {
+    "index": 74,
+    "taxon_id": 12971,
+    "scientific_name": "Muscicapa striata",
+    "common_name": "Spotted Flycatcher"
+  },
+  {
+    "index": 75,
+    "taxon_id": 4237,
+    "scientific_name": "Tachybaptus ruficollis",
+    "common_name": "Little Grebe"
+  },
+  {
+    "index": 76,
+    "taxon_id": 2599,
+    "scientific_name": "Alcedo atthis",
+    "common_name": "Common Kingfisher"
+  },
+  {
+    "index": 77,
+    "taxon_id": 5366,
+    "scientific_name": "Gyps fulvus",
+    "common_name": "Eurasian Griffon"
+  },
+  {
+    "index": 78,
+    "taxon_id": 558438,
+    "scientific_name": "Spatula clypeata",
+    "common_name": "Northern Shoveler"
+  },
+  {
+    "index": 79,
+    "taxon_id": 41,
+    "scientific_name": "Grus grus",
+    "common_name": "Common Crane"
+  },
+  {
+    "index": 80,
+    "taxon_id": 3879,
+    "scientific_name": "Tringa totanus",
+    "common_name": "Common Redshank"
+  },
+  {
+    "index": 81,
+    "taxon_id": 13988,
+    "scientific_name": "Prunella modularis",
+    "common_name": "Dunnock"
+  },
+  {
+    "index": 82,
+    "taxon_id": 144823,
+    "scientific_name": "Periparus ater",
+    "common_name": "Coal Tit"
+  },
+  {
+    "index": 83,
+    "taxon_id": 145303,
+    "scientific_name": "Spinus spinus",
+    "common_name": "Eurasian Siskin"
+  },
+  {
+    "index": 84,
+    "taxon_id": 7067,
+    "scientific_name": "Tadorna tadorna",
+    "common_name": "Common Shelduck"
+  },
+  {
+    "index": 85,
+    "taxon_id": 12908,
+    "scientific_name": "Saxicola rubetra",
+    "common_name": "Whinchat"
+  },
+  {
+    "index": 86,
+    "taxon_id": 13688,
+    "scientific_name": "Motacilla cinerea",
+    "common_name": "Grey Wagtail"
+  },
+  {
+    "index": 87,
+    "taxon_id": 558441,
+    "scientific_name": "Mareca penelope",
+    "common_name": "Eurasian Wigeon"
+  },
+  {
+    "index": 88,
+    "taxon_id": 1289470,
+    "scientific_name": "Curruca communis",
+    "common_name": "Greater Whitethroat"
+  },
+  {
+    "index": 89,
+    "taxon_id": 9236,
+    "scientific_name": "Serinus serinus",
+    "common_name": "European Serin"
+  },
+  {
+    "index": 90,
+    "taxon_id": 64705,
+    "scientific_name": "Delichon urbicum",
+    "common_name": "Western House Martin"
+  },
+  {
+    "index": 91,
+    "taxon_id": 4835,
+    "scientific_name": "Himantopus himantopus",
+    "common_name": "Black-winged Stilt"
+  },
+  {
+    "index": 92,
+    "taxon_id": 13729,
+    "scientific_name": "Anthus pratensis",
+    "common_name": "Meadow Pipit"
+  },
+  {
+    "index": 93,
+    "taxon_id": 73222,
+    "scientific_name": "Phoenicopterus roseus",
+    "common_name": "Greater Flamingo"
+  },
+  {
+    "index": 94,
+    "taxon_id": 2191,
+    "scientific_name": "Merops apiaster",
+    "common_name": "European Bee-eater"
+  },
+  {
+    "index": 95,
+    "taxon_id": 204512,
+    "scientific_name": "Ficedula hypoleuca",
+    "common_name": "European Pied Flycatcher"
+  },
+  {
+    "index": 96,
+    "taxon_id": 12992,
+    "scientific_name": "Phoenicurus phoenicurus",
+    "common_name": "Common Redstart"
+  },
+  {
+    "index": 97,
+    "taxon_id": 20969,
+    "scientific_name": "Upupa epops",
+    "common_name": "Common Hoopoe"
+  },
+  {
+    "index": 98,
+    "taxon_id": 5309,
+    "scientific_name": "Haliaeetus albicilla",
+    "common_name": "White-tailed Eagle"
+  },
+  {
+    "index": 99,
+    "taxon_id": 144243,
+    "scientific_name": "Picus viridis",
+    "common_name": "Eurasian Green Woodpecker"
+  }
+]

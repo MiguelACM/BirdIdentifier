@@ -3,6 +3,8 @@
 A learning project: identify European bird species from a photo, with the model
 running **entirely in the browser**.
 
+**Live demo:** https://miguelacm.github.io/BirdIdentifier/
+
 - **ML:** PyTorch + [timm](https://github.com/huggingface/pytorch-image-models), fine-tuning a pretrained image model, exported to ONNX
 - **Web:** ONNX Runtime Web (WebGPU / WASM), so photos never leave the device
 - **Data:** research-grade bird observations from [iNaturalist](https://www.inaturalist.org/)
@@ -37,7 +39,7 @@ ml/
     splits/             # ignored: train/val/test CSVs + labels.json
 web/
   index.html, style.css, app.js   # static site, no build step
-  model/                # ignored: model.int8.onnx, labels.json, config.json
+  model/                # committed: model.int8.onnx (15 MB), labels.json, config.json
 ```
 
 ## Building the dataset
@@ -113,14 +115,23 @@ photo and Wikipedia link for each suggested species from the iNaturalist API. On
 IDs are sent, never the photo.
 
 By default it uses the **int8-quantised** model: 15 MB instead of 60 MB, with about
-0.5–1% lower accuracy (on 600 test photos: 76.8% vs 77.5% top-1). To run it locally:
+0.5–1% lower accuracy (on 600 test photos: 76.8% vs 77.5% top-1). The model is committed
+in `web/model/` (non-commercial use only, see [web/model/README.md](web/model/README.md)).
+
+Run it locally:
 
 ```bash
-# put the model files in web/model/ (from bird-model.zip, or export them yourself)
-cd ml && python -m src.export_onnx runs/<run>/best.pt --out ../web/model --int8 && cd ..
-
 python3 -m http.server 8000 --directory web   # then open http://localhost:8000
 ```
+
+To replace the model with a newly trained one:
+
+```bash
+cd ml && python -m src.export_onnx runs/<run>/best.pt --out ../web/model --int8
+```
+
+The site is published to GitHub Pages by `.github/workflows/pages.yml` whenever `web/`
+changes on `main`.
 
 ## Data and licensing
 

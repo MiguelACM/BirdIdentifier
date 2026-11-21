@@ -18,7 +18,13 @@ ml/dist/
 # Web
 web/node_modules/
 web/dist/
-web/model/
+# The site's model IS committed so GitHub Pages can serve it (int8 only, 15 MB);
+# any other model files dropped into web/model/ stay ignored
+web/model/*
+!web/model/model.int8.onnx
+!web/model/labels.json
+!web/model/config.json
+!web/model/README.md
 
 # OS / editors
 .DS_Store
