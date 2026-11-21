@@ -109,8 +109,11 @@ The exported ONNX model includes normalisation and softmax. The browser passes i
 
 A static page (plain HTML/CSS/JS) that runs the model with
 [ONNX Runtime Web](https://onnxruntime.ai/docs/tutorials/web/) (WebAssembly). The photo
-is resized and centre-cropped in a canvas exactly like the validation transform, and
-classified on the device in about 0.4 s. After a prediction, the page loads a reference
+is first classified using the same centre square as the validation transform, on the
+device, in about 0.4 s. A **crop box** shows exactly what the model sees. Users can drag it
+onto the bird or resize it from a corner (also with the arrow keys and +/-), and the model
+re-runs on the new crop when they let go. This matters for small or off-centre birds,
+which the centre square often misses. After a prediction, the page loads a reference
 photo and Wikipedia link for each suggested species from the iNaturalist API. Only species
 IDs are sent, never the photo.
 

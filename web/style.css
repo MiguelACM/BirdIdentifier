@@ -144,14 +144,61 @@ a { color: var(--accent); }
 @media (max-width: 640px) {
   .result { grid-template-columns: 1fr; }
 }
-.preview { margin: 0; }
-.preview img {
-  width: 100%;
-  max-height: 420px;
-  object-fit: contain;
-  background: var(--surface);
-  border: 1px solid var(--border);
+.preview { margin: 0; text-align: center; }
+.preview figcaption { text-align: left; margin-top: 6px; }
+
+/* The stage shrink-wraps the image, so crop-box percentages map onto the photo */
+.crop-stage {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
   border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  vertical-align: top;
+  user-select: none;
+}
+.crop-stage img {
+  display: block;
+  max-width: 100%;
+  max-height: 420px;
+  width: auto;
+  height: auto;
+}
+.crop-box {
+  position: absolute;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45); /* dims everything outside the square */
+  cursor: move;
+  touch-action: none; /* let pointer events handle touch drags instead of scrolling */
+}
+.crop-box:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.handle {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  margin: -11px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--accent);
+  touch-action: none;
+}
+.handle[data-sx="-1"] { left: 0; }
+.handle[data-sx="1"] { left: 100%; }
+.handle[data-sy="-1"] { top: 0; }
+.handle[data-sy="1"] { top: 100%; }
+.handle[data-sx="-1"][data-sy="-1"], .handle[data-sx="1"][data-sy="1"] { cursor: nwse-resize; }
+.handle[data-sx="1"][data-sy="-1"], .handle[data-sx="-1"][data-sy="1"] { cursor: nesw-resize; }
+
+.link-button {
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .notice {

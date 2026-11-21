@@ -1,8 +1,9 @@
 // Bird Identifier: runs the exported ONNX model in the browser with ONNX Runtime Web.
 //
-// Flow: load model + labels -> user picks a photo -> resize & centre-crop to
-// 224x224 (same as the validation transform in ml/src/train.py) -> run the
-// model -> show the top 5 species.
+// Flow: load model + labels -> user picks a photo -> classify the centre square
+// (same as the validation transform in ml/src/train.py) -> show the top 5
+// species. The user can then move/resize the square onto the bird, and the
+// model re-runs on that crop when they let go.
 
 import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/ort.wasm.min.mjs";
 
@@ -31,6 +32,8 @@ const els = {
   exampleList: $("example-list"),
   exampleCredit: $("example-credit"),
   exampleVerdict: $("example-verdict"),
+  cropBox: $("crop-box"),
+  cropReset: $("crop-reset"),
 };
 
 let session, labels, config;
@@ -125,21 +128,22 @@ function renderSpeciesList() {
 
 // ------------------------------------------------------------------ preprocessing
 
-// Mirror of the eval transform in train.py: resize so the short side is
-// config.resize px, centre-crop config.img_size px, scale RGB to 0..1, CHW layout.
-// (Normalisation is built into the ONNX model.)
-async function imageToTensor(file) {
-  // createImageBitmap applies EXIF orientation, so phone photos come out upright
-  const bitmap = await createImageBitmap(file);
+// The default crop mirrors the eval transform in train.py: resizing the short
+// side to config.resize px and centre-cropping config.img_size px is the same as
+// taking a centred square whose side is img_size/resize of the short side.
+function defaultCrop(width, height) {
+  const size = Math.min(width, height) * (config.img_size / config.resize);
+  return { x: (width - size) / 2, y: (height - size) / 2, size };
+}
+
+// Draw the crop square (in original-photo pixels) at img_size x img_size,
+// scale RGB to 0..1 and lay it out as CHW. (Normalisation is built into the model.)
+function cropToTensor(bitmap, crop) {
   const size = config.img_size;
-  const scale = config.resize / Math.min(bitmap.width, bitmap.height);
-  const cropInSource = size / scale; // side of the centre square, in original pixels
-  const sx = (bitmap.width - cropInSource) / 2;
-  const sy = (bitmap.height - cropInSource) / 2;
 
   // Downscale in halving steps: one big jump (e.g. 4000px -> 224px) looks
   // jagged in some browsers, which would hurt accuracy.
-  let source = bitmap, srcX = sx, srcY = sy, srcSide = cropInSource;
+  let source = bitmap, srcX = crop.x, srcY = crop.y, srcSide = crop.size;
   while (srcSide > size * 2) {
     const half = Math.round(srcSide / 2);
     const step = new OffscreenCanvas(half, half);
@@ -153,7 +157,6 @@ async function imageToTensor(file) {
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(source, srcX, srcY, srcSide, srcSide, 0, 0, size, size);
-  bitmap.close();
 
   const { data } = ctx.getImageData(0, 0, size, size); // RGBA, row by row
   const plane = size * size;
@@ -168,30 +171,157 @@ async function imageToTensor(file) {
 
 // ------------------------------------------------------------------ prediction
 
+// The photo currently shown: decoded once, re-cropped as the user moves the box.
+const current = { bitmap: null, crop: null, example: null };
+
 async function classify(file, example = null) {
   if (!session) return;
+  // createImageBitmap applies EXIF orientation, so phone photos come out upright
+  const bitmap = await createImageBitmap(file);
+  current.bitmap?.close();
+  Object.assign(current, { bitmap, crop: defaultCrop(bitmap.width, bitmap.height), example });
+
+  if (els.preview.src) URL.revokeObjectURL(els.preview.src);
   els.preview.src = URL.createObjectURL(file);
   els.result.hidden = false;
-  els.list.replaceChildren();
-  els.uncertain.hidden = true;
-  els.exampleVerdict.hidden = true;
-  els.timing.textContent = "Identifying…";
   showExampleCredit(example);
+  await els.preview.decode().catch(() => {});
+  renderCropBox();
+  await runModel();
+}
 
-  const t0 = performance.now();
-  const input = await imageToTensor(file);
-  const output = await session.run({ image: input });
-  const probs = output.probs.data;
-  const ms = performance.now() - t0;
+// Run the model on the current crop. If the user moves the box while a run is
+// in progress, run once more afterwards with the latest crop.
+let running = false, rerun = false;
+async function runModel() {
+  if (running) { rerun = true; return; }
+  running = true;
+  try {
+    do {
+      rerun = false;
+      els.timing.textContent = "Identifying…";
+      const t0 = performance.now();
+      const output = await session.run({ image: cropToTensor(current.bitmap, current.crop) });
+      showResults(output.probs.data, performance.now() - t0);
+    } while (rerun);
+  } finally {
+    running = false;
+  }
+}
 
+function showResults(probs, ms) {
   const top = [...probs.keys()].sort((a, b) => probs[b] - probs[a]).slice(0, TOP_K);
   const results = top.map((i) => ({ ...labels[i], p: probs[i] }));
 
   els.uncertain.hidden = results[0].p >= UNCERTAIN_BELOW;
+  els.exampleVerdict.hidden = true;
   els.list.replaceChildren(...results.map(renderPrediction));
   els.timing.textContent = `Identified in ${Math.round(ms)} ms on your device.`;
-  if (example) showExampleVerdict(example, results[0]);
+  if (current.example) showExampleVerdict(current.example, results[0]);
   addReferencePhotos(results);
+}
+
+// ------------------------------------------------------------------ crop box
+
+// Crop coordinates are kept in original-photo pixels; the box on screen is
+// positioned in percentages of the displayed image, so window resizes need no code.
+function renderCropBox() {
+  const { width, height } = current.bitmap;
+  const { x, y, size } = current.crop;
+  Object.assign(els.cropBox.style, {
+    left: `${(x / width) * 100}%`,
+    top: `${(y / height) * 100}%`,
+    width: `${(size / width) * 100}%`,
+    height: `${(size / height) * 100}%`,
+  });
+}
+
+const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+const minCropSize = () => Math.min(current.bitmap.width, current.bitmap.height) * 0.1;
+
+// Screen pixels -> original-photo pixels
+function toPhotoCoords(e) {
+  const rect = els.preview.getBoundingClientRect();
+  const scale = current.bitmap.width / rect.width;
+  return { x: (e.clientX - rect.left) * scale, y: (e.clientY - rect.top) * scale };
+}
+
+let drag = null;
+
+function startDrag(e) {
+  if (!current.bitmap) return;
+  e.preventDefault();
+  const handle = e.target.closest(".handle");
+  const p = toPhotoCoords(e);
+  const { x, y, size } = current.crop;
+  if (handle) {
+    // Resize from a corner, keeping the opposite corner fixed
+    const sx = Number(handle.dataset.sx), sy = Number(handle.dataset.sy);
+    drag = { mode: "resize", sx, sy, ax: sx > 0 ? x : x + size, ay: sy > 0 ? y : y + size };
+  } else {
+    drag = { mode: "move", start: p, crop: { ...current.crop } };
+  }
+  els.cropBox.setPointerCapture(e.pointerId);
+}
+
+function onDrag(e) {
+  if (!drag) return;
+  const p = toPhotoCoords(e);
+  const { width: W, height: H } = current.bitmap;
+  if (drag.mode === "move") {
+    const { x, y, size } = drag.crop;
+    current.crop = {
+      size,
+      x: clamp(x + p.x - drag.start.x, 0, W - size),
+      y: clamp(y + p.y - drag.start.y, 0, H - size),
+    };
+  } else {
+    const { sx, sy, ax, ay } = drag;
+    const wanted = Math.max(sx * (p.x - ax), sy * (p.y - ay));
+    const room = Math.min(sx > 0 ? W - ax : ax, sy > 0 ? H - ay : ay);
+    const size = clamp(wanted, minCropSize(), room);
+    current.crop = { size, x: sx > 0 ? ax : ax - size, y: sy > 0 ? ay : ay - size };
+  }
+  renderCropBox();
+}
+
+function endDrag() {
+  if (!drag) return;
+  drag = null;
+  runModel().catch(showError);
+}
+
+// Keyboard: arrows move the box, +/- resize it (around its centre)
+let keyTimer;
+function onCropKey(e) {
+  if (!current.bitmap) return;
+  const { width: W, height: H } = current.bitmap;
+  const step = Math.min(W, H) * (e.shiftKey ? 0.1 : 0.02);
+  let { x, y, size } = current.crop;
+  const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+  if (moves[e.key]) {
+    x += moves[e.key][0];
+    y += moves[e.key][1];
+  } else if (e.key === "+" || e.key === "=" || e.key === "-") {
+    const newSize = clamp(size + (e.key === "-" ? -step : step), minCropSize(), Math.min(W, H));
+    x += (size - newSize) / 2;
+    y += (size - newSize) / 2;
+    size = newSize;
+  } else {
+    return;
+  }
+  e.preventDefault();
+  current.crop = { size, x: clamp(x, 0, W - size), y: clamp(y, 0, H - size) };
+  renderCropBox();
+  clearTimeout(keyTimer);
+  keyTimer = setTimeout(() => runModel().catch(showError), 300); // wait until keys stop
+}
+
+function resetCrop() {
+  if (!current.bitmap) return;
+  current.crop = defaultCrop(current.bitmap.width, current.bitmap.height);
+  renderCropBox();
+  runModel().catch(showError);
 }
 
 function showExampleCredit(example) {
@@ -298,6 +428,13 @@ for (const type of ["dragleave", "drop"]) {
 }
 els.dropzone.addEventListener("drop", (e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); });
 document.addEventListener("paste", (e) => handleFiles(e.clipboardData?.files));
+
+els.cropBox.addEventListener("pointerdown", startDrag);
+els.cropBox.addEventListener("pointermove", onDrag);
+els.cropBox.addEventListener("pointerup", endDrag);
+els.cropBox.addEventListener("pointercancel", endDrag);
+els.cropBox.addEventListener("keydown", onCropKey);
+els.cropReset.addEventListener("click", resetCrop);
 
 loadExamples().catch((err) => console.warn("Examples unavailable:", err));
 loadModel().catch((err) => {

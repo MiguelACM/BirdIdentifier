@@ -36,11 +36,22 @@
 
     <section id="result" class="result" hidden>
       <figure class="preview">
-        <img id="preview-img" alt="Your photo">
+        <div class="crop-stage" id="crop-stage">
+          <img id="preview-img" alt="Your photo" draggable="false">
+          <div id="crop-box" class="crop-box" tabindex="0" role="slider"
+               aria-label="Crop area: drag to move, arrow keys to move, plus and minus to resize">
+            <span class="handle" data-sx="-1" data-sy="-1"></span>
+            <span class="handle" data-sx="1" data-sy="-1"></span>
+            <span class="handle" data-sx="-1" data-sy="1"></span>
+            <span class="handle" data-sx="1" data-sy="1"></span>
+          </div>
+        </div>
         <figcaption class="hint">
           <span id="example-credit" hidden></span>
-          The model looks at the centre square of your photo.
-          For best results, crop so the bird fills most of the frame.</figcaption>
+          The model only sees what's inside the square. Drag it onto the bird, or drag a corner
+          to resize; results update when you let go.
+          <button type="button" id="crop-reset" class="link-button">Reset crop</button>
+        </figcaption>
       </figure>
       <div class="predictions">
         <h2>Top matches</h2>
