@@ -9,9 +9,16 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- English text below is the fallback; app.js replaces it with the chosen language (see i18n.js) -->
   <header>
-    <h1>Bird Identifier</h1>
-    <p class="tagline">Identify 100 common European birds from a photo. It runs entirely in your browser,
+    <div class="header-row">
+      <h1 data-i18n="title">Bird Identifier</h1>
+      <div class="lang-switch" role="group" data-i18n-aria="langLabel" aria-label="Language">
+        <button type="button" data-lang="en" lang="en">EN</button>
+        <button type="button" data-lang="pt" lang="pt">PT</button>
+      </div>
+    </div>
+    <p class="tagline" data-i18n="tagline">Identify 100 common European birds from a photo. It runs entirely in your browser,
       so your photo never leaves your device.</p>
   </header>
 
@@ -25,20 +32,20 @@
     <label id="dropzone" class="dropzone" tabindex="0">
       <input id="file-input" type="file" accept="image/*" hidden>
       <span class="dropzone-icon" aria-hidden="true">📷</span>
-      <strong>Choose or take a photo</strong>
-      <span class="hint">or drag and drop / paste an image here</span>
+      <strong data-i18n="dropTitle">Choose or take a photo</strong>
+      <span class="hint" data-i18n="dropHint">or drag and drop / paste an image here</span>
     </label>
 
     <section class="examples" aria-labelledby="examples-title">
-      <h2 id="examples-title">No photo handy? Try one of these</h2>
+      <h2 id="examples-title" data-i18n="examplesTitle">No photo handy? Try one of these</h2>
       <div id="example-list" class="example-list"></div>
     </section>
 
     <section id="result" class="result" hidden>
       <figure class="preview">
         <div class="crop-stage" id="crop-stage">
-          <img id="preview-img" alt="Your photo" draggable="false">
-          <div id="crop-box" class="crop-box" tabindex="0" role="slider"
+          <img id="preview-img" alt="Your photo" data-i18n-alt="previewAlt" draggable="false">
+          <div id="crop-box" class="crop-box" tabindex="0" role="slider" data-i18n-aria="cropAria"
                aria-label="Crop area: drag to move, arrow keys to move, plus and minus to resize">
             <span class="handle" data-sx="-1" data-sy="-1"></span>
             <span class="handle" data-sx="1" data-sy="-1"></span>
@@ -48,15 +55,15 @@
         </div>
         <figcaption class="hint">
           <span id="example-credit" hidden></span>
-          The model only sees what's inside the square. Drag it onto the bird, or drag a corner
-          to resize; results update when you let go.
-          <button type="button" id="crop-reset" class="link-button">Reset crop</button>
+          <span data-i18n="cropHint">The model only sees what's inside the square. Drag it onto the bird,
+            or drag a corner to resize; results update when you let go.</span>
+          <button type="button" id="crop-reset" class="link-button" data-i18n="cropReset">Reset crop</button>
         </figcaption>
       </figure>
       <div class="predictions">
-        <h2>Top matches</h2>
+        <h2 data-i18n="topMatches">Top matches</h2>
         <p id="example-verdict" class="notice" hidden></p>
-        <p id="uncertain" class="notice" hidden>
+        <p id="uncertain" class="notice" hidden data-i18n="uncertain">
           Not very confident. The bird may be small, far away or partly hidden,
           or it may not be one of the 100 species this model knows.
         </p>
@@ -66,13 +73,13 @@
     </section>
 
     <details class="species-list">
-      <summary>Which birds can it recognise?</summary>
+      <summary data-i18n="speciesSummary">Which birds can it recognise?</summary>
       <ul id="species-list"></ul>
     </details>
   </main>
 
   <footer>
-    <p>A learning project: a <code>convnext_nano</code> model fine-tuned on
+    <p data-i18n-html="footer">A learning project: a <code>convnext_nano</code> model fine-tuned on
       research-grade photos from <a href="https://www.inaturalist.org/">iNaturalist</a>,
       running with <a href="https://onnxruntime.ai/">ONNX Runtime Web</a>.
       Reference photos come from iNaturalist.</p>

@@ -6,6 +6,7 @@
 // model re-runs on that crop when they let go.
 
 import * as ort from "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/ort.wasm.min.mjs";
+import { LANGUAGES, applyStaticText, initialLanguage, saveLanguage, translate } from "./i18n.js";
 
 const MODEL_DIR = "model";
 // 8-bit version: 4x smaller download than model.onnx and only ~0.5-1% less accurate.
@@ -36,7 +37,38 @@ const els = {
   cropReset: $("crop-reset"),
 };
 
-let session, labels, config;
+let session, labels, config, examples = [];
+
+// ------------------------------------------------------------------ language
+
+let lang = "en";
+const speciesNames = {}; // lang -> {taxon_id: name}; English comes from labels.json
+const t = (key, vars) => translate(lang, key, vars);
+const speciesName = (taxonId, english) => speciesNames[lang]?.[taxonId] ?? english;
+
+// The model status line is re-rendered when the language changes
+let status = { key: "loading", vars: {} };
+function setStatus(key, vars = {}) {
+  status = { key, vars };
+  els.statusText.textContent = t(key, vars);
+}
+
+async function setLanguage(newLang) {
+  if (newLang !== "en" && !speciesNames[newLang]) {
+    speciesNames[newLang] = await fetch(`i18n/species.${newLang}.json`)
+      .then((r) => r.json()).catch(() => ({}));
+  }
+  lang = newLang;
+  applyStaticText(lang);
+  for (const btn of document.querySelectorAll(".lang-switch button")) {
+    btn.setAttribute("aria-pressed", String(btn.dataset.lang === lang));
+  }
+  setStatus(status.key, status.vars);
+  if (labels) renderSpeciesList();
+  renderExamples();
+  if (current.bitmap) showExampleCredit(current.example);
+  if (lastRun) showResults(lastRun.probs, lastRun.ms); // re-render, no need to re-run the model
+}
 
 // ------------------------------------------------------------------ loading
 
@@ -71,13 +103,13 @@ async function loadModel() {
 
   const bytes = await fetchWithProgress(`${MODEL_DIR}/${MODEL_FILE}`, (f) => {
     els.progress.value = f;
-    els.statusText.textContent = `Loading model… ${Math.round(f * 100)}%`;
+    setStatus("loadingPct", { pct: Math.round(f * 100) });
   });
-  els.statusText.textContent = "Preparing model…";
+  setStatus("preparing");
   session = await ort.InferenceSession.create(bytes, { executionProviders: ["wasm"] });
 
   els.status.classList.add("ready");
-  els.statusText.textContent = `Model ready: ${labels.length} species`;
+  setStatus("ready", { n: labels.length });
   els.dropzone.classList.remove("disabled");
   for (const btn of els.exampleList.querySelectorAll("button")) btn.disabled = false;
 }
@@ -87,19 +119,24 @@ async function loadModel() {
 // Test-set photos (never seen in training), CC0 / CC BY, loaded from iNaturalist.
 // One is a known mistake on purpose, to show the model's limits honestly.
 async function loadExamples() {
-  const examples = await fetch("examples.json").then((r) => r.json());
+  examples = await fetch("examples.json").then((r) => r.json());
+  renderExamples();
+}
+
+function renderExamples() {
   els.exampleList.replaceChildren(...examples.map((ex) => {
+    const name = speciesName(ex.taxon_id, ex.species);
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "example";
     btn.disabled = !session;
-    btn.title = `${ex.species}. Photo ${ex.attribution}`;
+    btn.title = t("exampleTitle", { species: name, attribution: ex.attribution });
     const img = document.createElement("img");
     img.src = ex.thumb;
-    img.alt = ex.species;
+    img.alt = name;
     img.loading = "lazy";
     const caption = document.createElement("span");
-    caption.textContent = ex.species;
+    caption.textContent = name;
     btn.append(img, caption);
     btn.addEventListener("click", () => classifyExample(ex).catch(showError));
     return btn;
@@ -107,18 +144,19 @@ async function loadExamples() {
 }
 
 async function classifyExample(ex) {
-  els.timing.textContent = "Loading example…";
+  els.timing.textContent = t("loadingExample");
   const resp = await fetch(ex.url);
-  if (!resp.ok) throw new Error(`could not load the example photo (HTTP ${resp.status})`);
+  if (!resp.ok) throw new Error(t("exampleLoadError", { status: resp.status }));
   const blob = await resp.blob();
   await classify(new File([blob], "example.jpg", { type: blob.type }), ex);
 }
 
 function renderSpeciesList() {
-  const sorted = [...labels].sort((a, b) => a.common_name.localeCompare(b.common_name));
-  els.speciesList.replaceChildren(...sorted.map((s) => {
+  const named = labels.map((s) => ({ ...s, name: speciesName(s.taxon_id, s.common_name) }));
+  named.sort((a, b) => a.name.localeCompare(b.name, lang));
+  els.speciesList.replaceChildren(...named.map((s) => {
     const li = document.createElement("li");
-    li.append(`${s.common_name} `);
+    li.append(`${s.name} `);
     const i = document.createElement("i");
     i.textContent = s.scientific_name;
     li.append(i);
@@ -193,16 +231,18 @@ async function classify(file, example = null) {
 // Run the model on the current crop. If the user moves the box while a run is
 // in progress, run once more afterwards with the latest crop.
 let running = false, rerun = false;
+let lastRun = null; // kept so a language switch can re-render without re-running
 async function runModel() {
   if (running) { rerun = true; return; }
   running = true;
   try {
     do {
       rerun = false;
-      els.timing.textContent = "Identifying…";
+      els.timing.textContent = t("identifying");
       const t0 = performance.now();
       const output = await session.run({ image: cropToTensor(current.bitmap, current.crop) });
-      showResults(output.probs.data, performance.now() - t0);
+      lastRun = { probs: output.probs.data, ms: performance.now() - t0 };
+      showResults(lastRun.probs, lastRun.ms);
     } while (rerun);
   } finally {
     running = false;
@@ -216,7 +256,7 @@ function showResults(probs, ms) {
   els.uncertain.hidden = results[0].p >= UNCERTAIN_BELOW;
   els.exampleVerdict.hidden = true;
   els.list.replaceChildren(...results.map(renderPrediction));
-  els.timing.textContent = `Identified in ${Math.round(ms)} ms on your device.`;
+  els.timing.textContent = t("identified", { ms: Math.round(ms) });
   if (current.example) showExampleVerdict(current.example, results[0]);
   addReferencePhotos(results);
 }
@@ -332,17 +372,16 @@ function showExampleCredit(example) {
   link.target = "_blank";
   link.rel = "noopener";
   link.textContent = "iNaturalist";
+  const species = speciesName(example.taxon_id, example.species);
   els.exampleCredit.replaceChildren(
-    `Example photo: ${example.species}. ${example.attribution}, via `, link, ".");
+    t("exampleCredit", { species, attribution: example.attribution }), link, ".");
 }
 
 function showExampleVerdict(example, best) {
-  const correct = best.common_name === example.species;
+  const correct = best.taxon_id === example.taxon_id;
+  const species = speciesName(example.taxon_id, example.species);
   els.exampleVerdict.classList.toggle("ok", correct);
-  els.exampleVerdict.textContent = correct
-    ? `✓ Correct: this photo is a ${example.species}.`
-    : `✗ The model got this one wrong: it's actually a ${example.species}. ` +
-      `Similar-looking species like this are where it makes most of its mistakes.`;
+  els.exampleVerdict.textContent = t(correct ? "correct" : "wrong", { species });
   els.exampleVerdict.hidden = false;
   if (!correct) els.uncertain.hidden = true; // the verdict already explains it
 }
@@ -364,7 +403,7 @@ function renderPrediction(r) {
       </div>
       <div class="links"><a target="_blank" rel="noopener">iNaturalist</a></div>
     </div>`;
-  li.querySelector(".common").textContent = r.common_name;
+  li.querySelector(".common").textContent = speciesName(r.taxon_id, r.common_name);
   li.querySelector(".scientific").textContent = r.scientific_name;
   li.querySelector(".bar > span").style.width = `${(r.p * 100).toFixed(1)}%`;
   li.querySelector(".pct").textContent = `${(r.p * 100).toFixed(r.p < 0.1 ? 1 : 0)}%`;
@@ -377,7 +416,8 @@ function renderPrediction(r) {
 async function addReferencePhotos(results) {
   try {
     const ids = results.map((r) => r.taxon_id).join(",");
-    const resp = await fetch(`https://api.inaturalist.org/v1/taxa/${ids}`);
+    // locale makes iNaturalist return the Wikipedia link in the page's language
+    const resp = await fetch(`https://api.inaturalist.org/v1/taxa/${ids}?locale=${lang}`);
     const { results: taxa } = await resp.json();
     for (const t of taxa) {
       const li = els.list.querySelector(`[data-taxon-id="${t.id}"]`);
@@ -409,7 +449,7 @@ function handleFiles(files) {
 
 function showError(err) {
   console.error(err);
-  els.timing.textContent = `Something went wrong: ${err.message}`;
+  els.timing.textContent = t("error", { msg: err.message });
 }
 
 els.dropzone.classList.add("disabled");
@@ -436,10 +476,18 @@ els.cropBox.addEventListener("pointercancel", endDrag);
 els.cropBox.addEventListener("keydown", onCropKey);
 els.cropReset.addEventListener("click", resetCrop);
 
+for (const btn of document.querySelectorAll(".lang-switch button")) {
+  btn.addEventListener("click", () => {
+    saveLanguage(btn.dataset.lang); // only remembered when the visitor chooses
+    setLanguage(btn.dataset.lang).catch(showError);
+  });
+}
+
+// Pick the language before loading anything else, so nothing flashes in English
+await setLanguage(initialLanguage());
 loadExamples().catch((err) => console.warn("Examples unavailable:", err));
 loadModel().catch((err) => {
   console.error(err);
   els.status.classList.add("error");
-  els.statusText.textContent =
-    `Could not load the model (${err.message}). See the README for how to put it in web/model/.`;
+  setStatus("loadError", { msg: err.message });
 });

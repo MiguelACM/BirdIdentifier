@@ -39,6 +39,8 @@ ml/
     splits/             # ignored: train/val/test CSVs + labels.json
 web/
   index.html, style.css, app.js   # static site, no build step
+  i18n.js, i18n/        # page text (EN/PT) and Portuguese species names
+  examples.json         # example photos (test set, CC0/CC BY, loaded from iNaturalist)
   model/                # committed: model.int8.onnx (15 MB), labels.json, config.json
 ```
 
@@ -116,6 +118,12 @@ re-runs on the new crop when they let go. This matters for small or off-centre b
 which the centre square often misses. After a prediction, the page loads a reference
 photo and Wikipedia link for each suggested species from the iNaturalist API. Only species
 IDs are sent, never the photo.
+
+The page is available in **English and Portuguese**. It follows the browser's language, and
+an EN | PT switch at the top remembers the visitor's choice. Page text lives in
+`web/i18n.js`. Portuguese species names (the names used in Portugal) come from iNaturalist
+via `python -m src.fetch_species_names --locale pt --place 7122 --lang pt`, which writes
+`web/i18n/species.pt.json`. In Portuguese, Wikipedia links point to pt.wikipedia.org.
 
 Six **example photos** (`web/examples.json`) let visitors try it without a photo of their own.
 They come from the test set, so the model never saw them during training, and are CC0 / CC BY
