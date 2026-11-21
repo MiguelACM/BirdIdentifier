@@ -114,6 +114,11 @@ classified on the device in about 0.4 s. After a prediction, the page loads a re
 photo and Wikipedia link for each suggested species from the iNaturalist API. Only species
 IDs are sent, never the photo.
 
+Six **example photos** (`web/examples.json`) let visitors try it without a photo of their own.
+They come from the test set, so the model never saw them during training, and are CC0 / CC BY
+licensed, credited and loaded from iNaturalist. Five are correct; one (a Herring Gull taken
+for a Lesser Black-backed Gull) is a known mistake, kept on purpose to show the model's limits.
+
 By default it uses the **int8-quantised** model: 15 MB instead of 60 MB, with about
 0.5–1% lower accuracy (on 600 test photos: 76.8% vs 77.5% top-1). The model is committed
 in `web/model/` (non-commercial use only, see [web/model/README.md](web/model/README.md)).

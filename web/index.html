@@ -29,14 +29,22 @@
       <span class="hint">or drag and drop / paste an image here</span>
     </label>
 
+    <section class="examples" aria-labelledby="examples-title">
+      <h2 id="examples-title">No photo handy? Try one of these</h2>
+      <div id="example-list" class="example-list"></div>
+    </section>
+
     <section id="result" class="result" hidden>
       <figure class="preview">
         <img id="preview-img" alt="Your photo">
-        <figcaption class="hint">The model looks at the centre square of your photo.
+        <figcaption class="hint">
+          <span id="example-credit" hidden></span>
+          The model looks at the centre square of your photo.
           For best results, crop so the bird fills most of the frame.</figcaption>
       </figure>
       <div class="predictions">
         <h2>Top matches</h2>
+        <p id="example-verdict" class="notice" hidden></p>
         <p id="uncertain" class="notice" hidden>
           Not very confident. The bird may be small, far away or partly hidden,
           or it may not be one of the 100 species this model knows.

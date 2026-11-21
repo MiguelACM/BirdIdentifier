@@ -1,0 +1,50 @@
+[
+  {
+    "species": "European Robin",
+    "url": "https://inaturalist-open-data.s3.amazonaws.com/photos/764805013/medium.jpg",
+    "thumb": "https://inaturalist-open-data.s3.amazonaws.com/photos/764805013/small.jpg",
+    "observation": "https://www.inaturalist.org/observations/415353619",
+    "license": "cc0",
+    "attribution": "no rights reserved"
+  },
+  {
+    "species": "Common Kingfisher",
+    "url": "https://inaturalist-open-data.s3.amazonaws.com/photos/762013271/medium.jpg",
+    "thumb": "https://inaturalist-open-data.s3.amazonaws.com/photos/762013271/small.jpg",
+    "observation": "https://www.inaturalist.org/observations/413977006",
+    "license": "cc-by",
+    "attribution": "(c) Cenaida, some rights reserved (CC BY)"
+  },
+  {
+    "species": "Common Hoopoe",
+    "url": "https://inaturalist-open-data.s3.amazonaws.com/photos/752246733/medium.jpg",
+    "thumb": "https://inaturalist-open-data.s3.amazonaws.com/photos/752246733/small.jpg",
+    "observation": "https://www.inaturalist.org/observations/409157910",
+    "license": "cc-by",
+    "attribution": "(c) Nico Hernandez, some rights reserved (CC BY)"
+  },
+  {
+    "species": "European Bee-eater",
+    "url": "https://inaturalist-open-data.s3.amazonaws.com/photos/757170949/medium.jpg",
+    "thumb": "https://inaturalist-open-data.s3.amazonaws.com/photos/757170949/small.jpg",
+    "observation": "https://www.inaturalist.org/observations/411576442",
+    "license": "cc-by",
+    "attribution": "(c) Marcin Zuwała, some rights reserved (CC BY)"
+  },
+  {
+    "species": "European Goldfinch",
+    "url": "https://inaturalist-open-data.s3.amazonaws.com/photos/763458040/medium.jpg",
+    "thumb": "https://inaturalist-open-data.s3.amazonaws.com/photos/763458040/small.jpg",
+    "observation": "https://www.inaturalist.org/observations/414693685",
+    "license": "cc-by",
+    "attribution": "(c) Вячеслав Юсупов, some rights reserved (CC BY)"
+  },
+  {
+    "species": "European Herring Gull",
+    "url": "https://inaturalist-open-data.s3.amazonaws.com/photos/764734664/medium.jpg",
+    "thumb": "https://inaturalist-open-data.s3.amazonaws.com/photos/764734664/small.jpg",
+    "observation": "https://www.inaturalist.org/observations/415319979",
+    "license": "cc-by",
+    "attribution": "(c) Jess Hughes, some rights reserved (CC BY)"
+  }
+]

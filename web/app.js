@@ -28,6 +28,9 @@ const els = {
   uncertain: $("uncertain"),
   timing: $("timing"),
   speciesList: $("species-list"),
+  exampleList: $("example-list"),
+  exampleCredit: $("example-credit"),
+  exampleVerdict: $("example-verdict"),
 };
 
 let session, labels, config;
@@ -73,6 +76,39 @@ async function loadModel() {
   els.status.classList.add("ready");
   els.statusText.textContent = `Model ready: ${labels.length} species`;
   els.dropzone.classList.remove("disabled");
+  for (const btn of els.exampleList.querySelectorAll("button")) btn.disabled = false;
+}
+
+// ------------------------------------------------------------------ examples
+
+// Test-set photos (never seen in training), CC0 / CC BY, loaded from iNaturalist.
+// One is a known mistake on purpose, to show the model's limits honestly.
+async function loadExamples() {
+  const examples = await fetch("examples.json").then((r) => r.json());
+  els.exampleList.replaceChildren(...examples.map((ex) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "example";
+    btn.disabled = !session;
+    btn.title = `${ex.species}. Photo ${ex.attribution}`;
+    const img = document.createElement("img");
+    img.src = ex.thumb;
+    img.alt = ex.species;
+    img.loading = "lazy";
+    const caption = document.createElement("span");
+    caption.textContent = ex.species;
+    btn.append(img, caption);
+    btn.addEventListener("click", () => classifyExample(ex).catch(showError));
+    return btn;
+  }));
+}
+
+async function classifyExample(ex) {
+  els.timing.textContent = "Loading example…";
+  const resp = await fetch(ex.url);
+  if (!resp.ok) throw new Error(`could not load the example photo (HTTP ${resp.status})`);
+  const blob = await resp.blob();
+  await classify(new File([blob], "example.jpg", { type: blob.type }), ex);
 }
 
 function renderSpeciesList() {
@@ -132,13 +168,15 @@ async function imageToTensor(file) {
 
 // ------------------------------------------------------------------ prediction
 
-async function classify(file) {
+async function classify(file, example = null) {
   if (!session) return;
   els.preview.src = URL.createObjectURL(file);
   els.result.hidden = false;
   els.list.replaceChildren();
   els.uncertain.hidden = true;
+  els.exampleVerdict.hidden = true;
   els.timing.textContent = "Identifying…";
+  showExampleCredit(example);
 
   const t0 = performance.now();
   const input = await imageToTensor(file);
@@ -152,7 +190,31 @@ async function classify(file) {
   els.uncertain.hidden = results[0].p >= UNCERTAIN_BELOW;
   els.list.replaceChildren(...results.map(renderPrediction));
   els.timing.textContent = `Identified in ${Math.round(ms)} ms on your device.`;
+  if (example) showExampleVerdict(example, results[0]);
   addReferencePhotos(results);
+}
+
+function showExampleCredit(example) {
+  els.exampleCredit.hidden = !example;
+  if (!example) return;
+  const link = document.createElement("a");
+  link.href = example.observation;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = "iNaturalist";
+  els.exampleCredit.replaceChildren(
+    `Example photo: ${example.species}. ${example.attribution}, via `, link, ".");
+}
+
+function showExampleVerdict(example, best) {
+  const correct = best.common_name === example.species;
+  els.exampleVerdict.classList.toggle("ok", correct);
+  els.exampleVerdict.textContent = correct
+    ? `✓ Correct: this photo is a ${example.species}.`
+    : `✗ The model got this one wrong: it's actually a ${example.species}. ` +
+      `Similar-looking species like this are where it makes most of its mistakes.`;
+  els.exampleVerdict.hidden = false;
+  if (!correct) els.uncertain.hidden = true; // the verdict already explains it
 }
 
 function renderPrediction(r) {
@@ -237,6 +299,7 @@ for (const type of ["dragleave", "drop"]) {
 els.dropzone.addEventListener("drop", (e) => { e.preventDefault(); handleFiles(e.dataTransfer.files); });
 document.addEventListener("paste", (e) => handleFiles(e.clipboardData?.files));
 
+loadExamples().catch((err) => console.warn("Examples unavailable:", err));
 loadModel().catch((err) => {
   console.error(err);
   els.status.classList.add("error");
