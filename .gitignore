@@ -33,3 +33,6 @@ web/model/*
 .DS_Store
 .vscode/
 .idea/
+
+# Local Claude Code settings (preview server config)
+.claude/
