@@ -18,6 +18,7 @@ ml/dist/
 # Web
 web/node_modules/
 web/dist/
+web/model/
 
 # OS / editors
 .DS_Store

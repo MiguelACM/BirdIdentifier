@@ -13,7 +13,7 @@ running **entirely in the browser**.
 - [x] Training and ONNX export code (tested locally on a tiny subset)
 - [x] Train on a GPU (Kaggle) and evaluate: **75.2% top-1, 90.1% top-5** on the test set
 - [ ] Improve: more epochs, higher resolution (288px), more photos per species
-- [ ] Export to ONNX and build a minimal web page (upload a photo, see the top 5 species)
+- [x] Web app: upload a photo and see the top 5 species, running locally in the browser
 - [ ] Re-rank predictions by location and season
 - [ ] Scale up from 100 species to all of Europe
 
@@ -35,7 +35,9 @@ ml/
     species.csv         # committed: the species list
     raw/                # ignored: downloaded images + manifest.csv
     splits/             # ignored: train/val/test CSVs + labels.json
-web/                    # browser app (coming soon)
+web/
+  index.html, style.css, app.js   # static site, no build step
+  model/                # ignored: model.int8.onnx, labels.json, config.json
 ```
 
 ## Building the dataset
@@ -100,6 +102,25 @@ and Little vs Great Egret. Distinctive birds (flamingo, heron, swan, moorhen) sc
 
 The exported ONNX model includes normalisation and softmax. The browser passes in a
 224×224 RGB image scaled to 0–1 and gets back one probability per species.
+
+## Web app
+
+A static page (plain HTML/CSS/JS) that runs the model with
+[ONNX Runtime Web](https://onnxruntime.ai/docs/tutorials/web/) (WebAssembly). The photo
+is resized and centre-cropped in a canvas exactly like the validation transform, and
+classified on the device in about 0.4 s. After a prediction, the page loads a reference
+photo and Wikipedia link for each suggested species from the iNaturalist API. Only species
+IDs are sent, never the photo.
+
+By default it uses the **int8-quantised** model: 15 MB instead of 60 MB, with about
+0.5–1% lower accuracy (on 600 test photos: 76.8% vs 77.5% top-1). To run it locally:
+
+```bash
+# put the model files in web/model/ (from bird-model.zip, or export them yourself)
+cd ml && python -m src.export_onnx runs/<run>/best.pt --out ../web/model --int8 && cd ..
+
+python3 -m http.server 8000 --directory web   # then open http://localhost:8000
+```
 
 ## Data and licensing
 

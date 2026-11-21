@@ -45,6 +45,8 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("checkpoint", type=Path)
     p.add_argument("--out", type=Path, default=None, help="default: next to the checkpoint")
+    p.add_argument("--int8", action="store_true",
+                   help="also write model.int8.onnx: 4x smaller, ~0.5-1%% less accurate")
     args = p.parse_args()
     out = args.out or args.checkpoint.parent
     out.mkdir(parents=True, exist_ok=True)
@@ -87,6 +89,14 @@ def main() -> None:
     }, indent=2))
     mb = onnx_path.stat().st_size / 1e6
     print(f"Wrote {onnx_path} ({mb:.1f} MB), labels.json, config.json")
+
+    if args.int8:
+        # Dynamic quantisation: weights stored as 8-bit integers instead of 32-bit floats
+        from onnxruntime.quantization import QuantType, quantize_dynamic
+
+        int8_path = out / "model.int8.onnx"
+        quantize_dynamic(str(onnx_path), str(int8_path), weight_type=QuantType.QUInt8)
+        print(f"Wrote {int8_path} ({int8_path.stat().st_size / 1e6:.1f} MB)")
 
 
 if __name__ == "__main__":

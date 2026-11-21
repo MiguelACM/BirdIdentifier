@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bird Identifier</title>
+  <meta name="description" content="Identify European birds from a photo. The model runs in your browser, so your photo never leaves your device.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐦</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Bird Identifier</h1>
+    <p class="tagline">Identify 100 common European birds from a photo. It runs entirely in your browser,
+      so your photo never leaves your device.</p>
+  </header>
+
+  <main>
+    <section id="model-status" class="status" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <span id="model-status-text">Loading model…</span>
+      <progress id="model-progress" max="1" value="0"></progress>
+    </section>
+
+    <label id="dropzone" class="dropzone" tabindex="0">
+      <input id="file-input" type="file" accept="image/*" hidden>
+      <span class="dropzone-icon" aria-hidden="true">📷</span>
+      <strong>Choose or take a photo</strong>
+      <span class="hint">or drag and drop / paste an image here</span>
+    </label>
+
+    <section id="result" class="result" hidden>
+      <figure class="preview">
+        <img id="preview-img" alt="Your photo">
+        <figcaption class="hint">The model looks at the centre square of your photo.
+          For best results, crop so the bird fills most of the frame.</figcaption>
+      </figure>
+      <div class="predictions">
+        <h2>Top matches</h2>
+        <p id="uncertain" class="notice" hidden>
+          Not very confident. The bird may be small, far away or partly hidden,
+          or it may not be one of the 100 species this model knows.
+        </p>
+        <ol id="prediction-list"></ol>
+        <p id="timing" class="hint"></p>
+      </div>
+    </section>
+
+    <details class="species-list">
+      <summary>Which birds can it recognise?</summary>
+      <ul id="species-list"></ul>
+    </details>
+  </main>
+
+  <footer>
+    <p>A learning project: a <code>convnext_nano</code> model fine-tuned on
+      research-grade photos from <a href="https://www.inaturalist.org/">iNaturalist</a>,
+      running with <a href="https://onnxruntime.ai/">ONNX Runtime Web</a>.
+      Reference photos come from iNaturalist.</p>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
