@@ -4,7 +4,7 @@
 
 export const LANGUAGES = ["en", "pt"];
 
-const STRINGS = {
+export const STRINGS = {
   en: {
     pageTitle: "Bird Identifier",
     metaDescription: "Identify European birds from a photo. The model runs in your browser, so your photo never leaves your device.",
@@ -25,7 +25,8 @@ const STRINGS = {
     cropHint: "The model only sees what's inside the square. Drag it onto the bird, or drag a corner to resize; results update when you let go.",
     cropReset: "Reset crop",
     topMatches: "Top matches",
-    uncertain: "Not very confident. The bird may be small, far away or partly hidden, or it may not be one of the {n} species this model knows.",
+    closestMatches: "Closest matches",
+    uncertain: "Probably not one of the {n} species I know. It may be another species or not a bird, or the bird may be small, far away or partly hidden.",
     loadingExample: "Loading example…",
     identifying: "Identifying…",
     identified: "Identified in {ms} ms on your device.",
@@ -73,7 +74,8 @@ const STRINGS = {
     cropHint: "O modelo só vê o que está dentro do quadrado. Arraste-o para cima da ave, ou arraste um canto para o redimensionar; os resultados atualizam quando largar.",
     cropReset: "Repor recorte",
     topMatches: "Espécies mais prováveis",
-    uncertain: "Pouca confiança. A ave pode ser pequena, estar longe ou parcialmente escondida, ou pode não ser uma das {n} espécies que este modelo conhece.",
+    closestMatches: "Espécies mais parecidas",
+    uncertain: "Provavelmente não é uma das {n} espécies que conheço. Pode ser outra espécie ou não ser uma ave, ou a ave pode ser pequena, estar longe ou parcialmente escondida.",
     loadingExample: "A carregar o exemplo…",
     identifying: "A identificar…",
     identified: "Identificação feita em {ms} ms no seu dispositivo.",

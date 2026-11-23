@@ -11,6 +11,7 @@ ml/data/splits/
 ml/data/gbif/
 ml/data/eval/
 ml/data/geo/
+ml/data/unknown/
 ml/data/*.log
 ml/runs/
 ml/dist/

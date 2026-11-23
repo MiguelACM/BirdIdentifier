@@ -29,7 +29,7 @@ def main() -> None:
     args = parser.parse_args()
 
     labels = json.loads(args.labels.read_text(encoding="utf-8"))
-    ids = [l["taxon_id"] for l in labels]
+    ids = [label["taxon_id"] for label in labels]
     client = INatClient()
     params = {"locale": args.locale}
     if args.place:

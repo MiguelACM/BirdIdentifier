@@ -1,5 +1,7 @@
 # Bird Identifier
 
+[![Tests](https://github.com/MiguelACM/BirdIdentifier/actions/workflows/tests.yml/badge.svg)](https://github.com/MiguelACM/BirdIdentifier/actions/workflows/tests.yml)
+
 A learning project: identify European bird species from a photo, with the model
 running **entirely in the browser**.
 
@@ -18,6 +20,9 @@ running **entirely in the browser**.
 - [x] Re-rank predictions by location and season (GBIF sightings per country and month)
 - [x] Scale up to 300 species, train longer (25 epochs) at higher resolution (288px) with
       more photos (500 per species): **76.5% top-1, 89.6% top-5** on the test set (v2)
+- [x] Say when a photo is probably not one of the known species (confidence cutoff, measured
+      on photos of other birds and of non-birds)
+- [x] Tests and GitHub Actions CI (lint, unit tests, model/priors/labels consistency)
 - [ ] Scale up further: about 450 European species have at least 300 iNaturalist observations
 
 ## Project layout
@@ -37,6 +42,8 @@ ml/
     make_country_grid.py    # GPS -> country lookup grid (web/country-grid.json)
     predict_split.py    # save the model's predictions on a split, for evaluation
     eval_priors.py      # measure the priors and pick their weight
+    eval_unknown.py     # measure how well it spots photos of species it doesn't know
+  tests/                # pytest: pipeline functions + consistency of the files in web/
   notebooks/
     train_kaggle.ipynb  # runs train + export on a free Kaggle GPU
   data/
@@ -50,7 +57,9 @@ web/
   priors.json           # species share of GBIF sightings per country and month
   country-grid.json     # 0.1° grid for turning GPS coordinates into a country
   examples.json         # example photos (test set, CC0/CC BY, loaded from iNaturalist)
-  model/                # committed: model.int8.onnx (15 MB), labels.json, config.json
+  model/                # committed: model.int8.onnx (16 MB), labels.json, config.json
+tests/web/              # node:test tests for the web app's JavaScript helpers
+.github/workflows/      # pages.yml deploys web/; tests.yml runs lint + tests on every push
 ```
 
 ## Building the dataset
@@ -211,6 +220,22 @@ places. Top-5 drops slightly, as the prior pushes rare-but-possible species out 
 shortlist. A weight above 1 starts to hurt: the prior then overrules clear photos of birds
 that are simply rare in that place.
 
+**Not one of my species?** The model always picks one of its 300 species, even for a fox. So
+when its best match on the photo alone is below 40%, the page says the bird is probably not
+one it knows, and lists the closest matches instead of "top matches". `python -m src.eval_unknown`
+picked that cutoff from 1,197 photos of the next 400 European bird species and 1,050 photos of
+mammals, insects, spiders, reptiles, amphibians, plants and fungi:
+
+| cutoff | correct photos of known species flagged | other bird species caught | non-birds caught |
+|---|---|---|---|
+| 30% | 2.4% | 24% | 62% |
+| **40%** | **4.3%** | **33%** | **71%** |
+| 50% | 7.2% | 42% | 79% |
+
+Non-birds are fairly easy to spot, but unknown birds are not: a Red-knobbed Coot is called a
+Eurasian Coot and a Spectacled Warbler a Greater Whitethroat, at about 90% confidence. Catching more
+would need training on "other" photos as a class of their own.
+
 Six **example photos** (`web/examples.json`) let visitors try it without a photo of their own.
 They come from the test set, so the model never saw them during training, and are CC0 / CC BY
 licensed, credited and loaded from iNaturalist. With location all six are correct; without it,
@@ -234,6 +259,21 @@ cd ml && python -m src.export_onnx runs/<run>/best.pt --out ../web/model --int8
 
 The site is published to GitHub Pages by `.github/workflows/pages.yml` whenever `web/`
 changes on `main`.
+
+## Tests
+
+GitHub Actions runs these on every push and pull request
+([.github/workflows/tests.yml](.github/workflows/tests.yml)):
+
+```bash
+cd ml && pip install pytest ruff && ruff check . && pytest   # Python, no PyTorch needed
+node --test "tests/web/*.test.mjs"                           # JavaScript (Node 22+)
+```
+
+Besides unit tests for the pipeline (splits, GBIF smoothing, GPS-to-country, image
+preprocessing), they check that the files in `web/` belong together: the model's output size
+matches `labels.json`, and the priors, Portuguese names and example photos cover exactly the
+same species. That catches a half-updated model before visitors do.
 
 ## Data and licensing
 

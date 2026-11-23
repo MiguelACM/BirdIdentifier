@@ -149,8 +149,8 @@ def evaluate(model, loader, device, criterion, use_amp: bool):
 
 def error_analysis(preds: list[int], labels: list[int], names: list[str]) -> dict:
     per_class_total: Counter = Counter(labels)
-    per_class_correct: Counter = Counter(l for p, l in zip(preds, labels) if p == l)
-    confusions: Counter = Counter((l, p) for p, l in zip(preds, labels) if p != l)
+    per_class_correct: Counter = Counter(y for p, y in zip(preds, labels) if p == y)
+    confusions: Counter = Counter((y, p) for p, y in zip(preds, labels) if p != y)
     per_class = sorted(
         ({"species": names[c], "accuracy": per_class_correct[c] / n, "n": n}
          for c, n in per_class_total.items()),
@@ -279,7 +279,7 @@ def main() -> None:
     splits_dir = args.data_dir / "splits"
     images_roots = [args.data_dir / "raw", *args.extra_image_roots]
     labels_info = json.loads((splits_dir / "labels.json").read_text(encoding="utf-8"))
-    names = [l["common_name"] or l["scientific_name"] for l in labels_info]
+    names = [x["common_name"] or x["scientific_name"] for x in labels_info]
 
     # ---- model
     model = timm.create_model(args.model, pretrained=not args.no_pretrained, num_classes=len(names))

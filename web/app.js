@@ -11,11 +11,14 @@ import { readExif } from "./exif.js";
 import { RARE_BELOW, applyPrior, countryAt, loadPriors, priorFor } from "./location.js";
 
 const MODEL_DIR = "model";
-// 8-bit version: 4x smaller download than model.onnx and only ~0.5-1% less accurate.
+// 8-bit version: 4x smaller download than model.onnx, with no measurable accuracy loss.
 // Swap in "model.onnx" to use the full-precision model.
 const MODEL_FILE = "model.int8.onnx";
 const TOP_K = 5;
-const UNCERTAIN_BELOW = 0.4; // show a warning when the best match is less likely than this
+// Below this photo-only confidence, say the bird is probably not one of the model's species.
+// Chosen with ml/src/eval_unknown.py: flags 4% of correct photos of known species, and catches
+// 71% of non-birds and 33% of photos of other bird species (see the README).
+const UNKNOWN_BELOW = 0.4;
 
 ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/";
 
@@ -30,6 +33,7 @@ const els = {
   preview: $("preview-img"),
   list: $("prediction-list"),
   uncertain: $("uncertain"),
+  matchesTitle: $("matches-title"),
   timing: $("timing"),
   speciesList: $("species-list"),
   exampleList: $("example-list"),
@@ -274,7 +278,11 @@ function showResults(probs, ms) {
   const photoTop = probs.indexOf(Math.max(...probs));
   els.locationNote.textContent = locationNote(photoTop === top[0] ? null : labels[photoTop]);
 
-  els.uncertain.hidden = results[0].p >= UNCERTAIN_BELOW;
+  // Judged on the photo alone: a location hint can make a wrong guess look more certain
+  const unknown = probs[photoTop] < UNKNOWN_BELOW;
+  els.uncertain.hidden = !unknown;
+  els.matchesTitle.dataset.i18n = unknown ? "closestMatches" : "topMatches";
+  els.matchesTitle.textContent = t(els.matchesTitle.dataset.i18n);
   els.exampleVerdict.hidden = true;
   els.list.replaceChildren(...results.map(renderPrediction));
   els.timing.textContent = t("identified", { ms: Math.round(ms) });

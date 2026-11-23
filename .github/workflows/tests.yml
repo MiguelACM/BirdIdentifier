@@ -1,0 +1,39 @@
+# Lints and tests the Python pipeline and the web app's JavaScript on every push and pull request.
+# Checks that the model files in web/ agree with each other too, so a broken model fails here
+# before (or at the same time as) the Pages deploy.
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ml
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      # Only what the tests need: no PyTorch (training and export are not tested here)
+      - run: pip install requests Pillow numpy onnxruntime pytest ruff
+      - run: ruff check .
+      - run: pytest -v
+
+  javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test "tests/web/*.test.mjs"

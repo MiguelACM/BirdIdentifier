@@ -149,7 +149,7 @@ def main() -> None:
     priors = {
         "source": f"GBIF.org occurrence counts per country and month, fetched {fetched}",
         "scale": SCALE,
-        "taxa": [l["taxon_id"] for l in labels],
+        "taxa": [label["taxon_id"] for label in labels],
         "countries": build_priors(counts, len(labels)),
     }
     # One country per line keeps the file small but still diffable
