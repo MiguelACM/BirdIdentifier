@@ -29,6 +29,8 @@ const els = {
   progress: $("model-progress"),
   dropzone: $("dropzone"),
   fileInput: $("file-input"),
+  cameraButton: $("camera-button"),
+  cameraInput: $("camera-input"),
   result: $("result"),
   preview: $("preview-img"),
   list: $("prediction-list"),
@@ -83,6 +85,28 @@ async function setLanguage(newLang) {
 
 // ------------------------------------------------------------------ loading
 
+// Offline support (sw.js). The service worker saves the app and the model as they load, so
+// the next visit works without a connection and can be installed to the home screen.
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch((err) => console.warn("No offline support:", err));
+}
+
+// Once the model is saved for offline use, say so in the status line
+async function showOfflineReady() {
+  if (!("serviceWorker" in navigator) || !("caches" in window)) return;
+  const registration = await navigator.serviceWorker.ready;
+  // On the first visit the model may have downloaded before the worker was running. Ask it to
+  // save a copy; the browser's HTTP cache usually has the file, so nothing is downloaded again.
+  registration.active?.postMessage({ save: [`${MODEL_DIR}/${MODEL_FILE}`] });
+  for (let i = 0; i < 60; i++) {
+    if (await caches.match(`${MODEL_DIR}/${MODEL_FILE}`)) {
+      if (status.key === "ready") setStatus("readyOffline", status.vars);
+      return;
+    }
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+}
+
 async function fetchWithProgress(url, onProgress) {
   const resp = await fetch(url);
   if (!resp.ok) throw new Error(`${url}: HTTP ${resp.status}`);
@@ -130,6 +154,8 @@ async function loadModel() {
   els.status.classList.add("ready");
   setStatus("ready", { n: labels.length });
   els.dropzone.classList.remove("disabled");
+  els.cameraButton.disabled = false;
+  showOfflineReady();
   for (const btn of els.exampleList.querySelectorAll("button")) btn.disabled = false;
 }
 
@@ -580,10 +606,18 @@ function showError(err) {
 }
 
 els.dropzone.classList.add("disabled");
-els.fileInput.addEventListener("change", () => {
-  handleFiles(els.fileInput.files);
-  els.fileInput.value = ""; // allow picking the same file again
-});
+for (const input of [els.fileInput, els.cameraInput]) {
+  input.addEventListener("change", () => {
+    handleFiles(input.files);
+    input.value = ""; // allow picking the same file again
+  });
+}
+// A camera button only makes sense on phones and tablets; desktops ignore `capture`
+if (matchMedia("(pointer: coarse)").matches) {
+  els.cameraButton.hidden = false;
+  els.cameraButton.disabled = true; // until the model is ready
+  els.cameraButton.addEventListener("click", () => els.cameraInput.click());
+}
 els.dropzone.addEventListener("keydown", (e) => {
   if (e.key === "Enter" || e.key === " ") { e.preventDefault(); els.fileInput.click(); }
 });

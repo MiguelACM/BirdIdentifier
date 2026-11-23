@@ -23,6 +23,7 @@ running **entirely in the browser**.
 - [x] Say when a photo is probably not one of the known species (confidence cutoff, measured
       on photos of other birds and of non-birds)
 - [x] Tests and GitHub Actions CI (lint, unit tests, model/priors/labels consistency)
+- [x] Offline and installable (service worker + web app manifest), camera button on phones
 - [ ] Scale up further: about 450 European species have at least 300 iNaturalist observations
 
 ## Project layout
@@ -54,6 +55,7 @@ web/
   index.html, style.css, app.js   # static site, no build step
   i18n.js, i18n/        # page text (EN/PT) and Portuguese species names
   location.js, exif.js  # location + season re-ranking, EXIF GPS/date reader
+  sw.js, manifest.webmanifest, icons/  # offline support and home-screen install
   priors.json           # species share of GBIF sightings per country and month
   country-grid.json     # 0.1° grid for turning GPS coordinates into a country
   examples.json         # example photos (test set, CC0/CC BY, loaded from iNaturalist)
@@ -173,6 +175,15 @@ an EN | PT switch at the top remembers the visitor's choice. Page text lives in
 via `python -m src.fetch_species_names --locale pt --place 7122 --lang pt`, which writes
 `web/i18n/species.pt.json`. In Portuguese, Wikipedia links point to pt.wikipedia.org.
 
+**Offline and installable.** A service worker (`web/sw.js`) saves the page, the model and
+ONNX Runtime the first time they load, so later visits start straight away and work with no
+signal, out in the field. The site's own files are fetched from the network first (with a
+4 s timeout), so a new deploy shows up as soon as you're online; ONNX Runtime has its version in
+the URL, so it is served from the cache. With `web/manifest.webmanifest` and the icons in
+`web/icons/`, phones offer **Add to home screen**, and the app then opens in its own window.
+On phones and tablets, a **Take a photo** button opens the camera directly. Reference photos,
+example photos and Wikipedia links still need a connection.
+
 ### Location and season
 
 A photo alone can't separate some look-alikes, but where and when it was taken often can:
@@ -273,7 +284,7 @@ node --test "tests/web/*.test.mjs"                           # JavaScript (Node 
 Besides unit tests for the pipeline (splits, GBIF smoothing, GPS-to-country, image
 preprocessing), they check that the files in `web/` belong together: the model's output size
 matches `labels.json`, and the priors, Portuguese names and example photos cover exactly the
-same species. That catches a half-updated model before visitors do.
+same species, and every file the service worker saves for offline use exists. That catches a half-updated model before visitors do.
 
 ## Data and licensing
 

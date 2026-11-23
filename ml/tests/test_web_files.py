@@ -72,3 +72,20 @@ def test_examples_are_known_species_in_supported_countries(labels):
         assert by_taxon.get(example["taxon_id"]) == example["species"]
         assert example["country"] in countries
         assert 1 <= example["month"] <= 12
+
+
+def test_offline_files_exist():
+    """sw.js saves these for offline use; a renamed or missing file would break the install."""
+    import re
+
+    sw = (WEB / "sw.js").read_text(encoding="utf-8")
+    ort = re.search(r'const ORT = "([^"]+)"', sw).group(1)
+    # the service worker must cache the same ONNX Runtime version the app loads
+    assert ort in (WEB / "app.js").read_text(encoding="utf-8")
+    block = re.search(r"const PRECACHE = \[(.*?)\];", sw, re.S).group(1)
+    local = [f for f in re.findall(r'"([^"]+)"', block) if f != "./"]
+    assert local, "no files found in PRECACHE"
+    for name in local:
+        assert (WEB / name).is_file(), name
+    for icon in load("manifest.webmanifest")["icons"]:
+        assert (WEB / icon["src"]).is_file(), icon["src"]

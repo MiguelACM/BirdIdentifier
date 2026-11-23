@@ -91,6 +91,22 @@ a { color: var(--accent); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---- drop zone */
+.camera-button {
+  display: block;
+  width: 100%;
+  margin: 10px 0 0;
+  padding: 14px;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--surface);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.camera-button[hidden] { display: none; }
+.camera-button:disabled { opacity: 0.5; cursor: default; }
+
 .dropzone {
   display: flex;
   flex-direction: column;

@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bird Identifier</title>
   <meta name="description" content="Identify European birds from a photo. The model runs in your browser, so your photo never leaves your device.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐦</text></svg>">
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#2f6f4f">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -35,6 +38,9 @@
       <strong data-i18n="dropTitle">Choose or take a photo</strong>
       <span class="hint" data-i18n="dropHint">or drag and drop / paste an image here</span>
     </label>
+    <!-- Opens the camera directly; shown only on touch devices (see app.js) -->
+    <button type="button" id="camera-button" class="camera-button" hidden data-i18n="takePhoto">Take a photo</button>
+    <input id="camera-input" type="file" accept="image/*" capture="environment" hidden>
 
     <section class="examples" aria-labelledby="examples-title">
       <h2 id="examples-title" data-i18n="examplesTitle">No photo handy? Try one of these</h2>
