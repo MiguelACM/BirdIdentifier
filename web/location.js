@@ -6,8 +6,8 @@
 
 // Chosen on the validation set by ml/src/eval_priors.py (see the README)
 export const PRIOR_WEIGHT = 0.7;
-// A species with less than this share of sightings (vs 1% for an average species
-// among the 100) is flagged as "few records" there and then.
+// A species with less than this share of sightings (an average species among the
+// 300 has 0.33%) is flagged as "few records" there and then.
 export const RARE_BELOW = 0.001;
 
 let priors = null, grid = null;

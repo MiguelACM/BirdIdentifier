@@ -10,7 +10,7 @@ const STRINGS = {
     metaDescription: "Identify European birds from a photo. The model runs in your browser, so your photo never leaves your device.",
     langLabel: "Language",
     title: "Bird Identifier",
-    tagline: "Identify 100 common European birds from a photo. It runs entirely in your browser, so your photo never leaves your device.",
+    tagline: "Identify {n} common European birds from a photo. It runs entirely in your browser, so your photo never leaves your device.",
     loading: "Loading model…",
     loadingPct: "Loading model… {pct}%",
     preparing: "Preparing model…",
@@ -25,7 +25,7 @@ const STRINGS = {
     cropHint: "The model only sees what's inside the square. Drag it onto the bird, or drag a corner to resize; results update when you let go.",
     cropReset: "Reset crop",
     topMatches: "Top matches",
-    uncertain: "Not very confident. The bird may be small, far away or partly hidden, or it may not be one of the 100 species this model knows.",
+    uncertain: "Not very confident. The bird may be small, far away or partly hidden, or it may not be one of the {n} species this model knows.",
     loadingExample: "Loading example…",
     identifying: "Identifying…",
     identified: "Identified in {ms} ms on your device.",
@@ -58,7 +58,7 @@ const STRINGS = {
     metaDescription: "Identifique aves da Europa a partir de uma fotografia. O modelo corre no seu navegador, por isso a fotografia nunca sai do seu dispositivo.",
     langLabel: "Idioma",
     title: "Identificador de Aves",
-    tagline: "Identifique 100 aves comuns da Europa a partir de uma fotografia. Tudo corre no seu navegador, por isso a sua fotografia nunca sai do seu dispositivo.",
+    tagline: "Identifique {n} aves comuns da Europa a partir de uma fotografia. Tudo corre no seu navegador, por isso a sua fotografia nunca sai do seu dispositivo.",
     loading: "A carregar o modelo…",
     loadingPct: "A carregar o modelo… {pct}%",
     preparing: "A preparar o modelo…",
@@ -73,7 +73,7 @@ const STRINGS = {
     cropHint: "O modelo só vê o que está dentro do quadrado. Arraste-o para cima da ave, ou arraste um canto para o redimensionar; os resultados atualizam quando largar.",
     cropReset: "Repor recorte",
     topMatches: "Espécies mais prováveis",
-    uncertain: "Pouca confiança. A ave pode ser pequena, estar longe ou parcialmente escondida, ou pode não ser uma das 100 espécies que este modelo conhece.",
+    uncertain: "Pouca confiança. A ave pode ser pequena, estar longe ou parcialmente escondida, ou pode não ser uma das {n} espécies que este modelo conhece.",
     loadingExample: "A carregar o exemplo…",
     identifying: "A identificar…",
     identified: "Identificação feita em {ms} ms no seu dispositivo.",
@@ -129,12 +129,12 @@ export function translate(lang, key, vars = {}) {
 
 // Fill every element marked with data-i18n (text), data-i18n-html (trusted
 // markup from this file), data-i18n-aria (aria-label) or data-i18n-alt (alt).
-export function applyStaticText(lang) {
+export function applyStaticText(lang, vars = {}) {
   document.documentElement.lang = lang;
   document.title = translate(lang, "pageTitle");
   document.querySelector('meta[name="description"]')
     ?.setAttribute("content", translate(lang, "metaDescription"));
-  for (const el of document.querySelectorAll("[data-i18n]")) el.textContent = translate(lang, el.dataset.i18n);
+  for (const el of document.querySelectorAll("[data-i18n]")) el.textContent = translate(lang, el.dataset.i18n, vars);
   for (const el of document.querySelectorAll("[data-i18n-html]")) el.innerHTML = translate(lang, el.dataset.i18nHtml);
   for (const el of document.querySelectorAll("[data-i18n-aria]")) el.setAttribute("aria-label", translate(lang, el.dataset.i18nAria));
   for (const el of document.querySelectorAll("[data-i18n-alt]")) el.alt = translate(lang, el.dataset.i18nAlt);

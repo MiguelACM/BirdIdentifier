@@ -65,7 +65,7 @@ async function setLanguage(newLang) {
       .then((r) => r.json()).catch(() => ({}));
   }
   lang = newLang;
-  applyStaticText(lang);
+  applyStaticText(lang, { n: labels?.length ?? "" });
   for (const btn of document.querySelectorAll(".lang-switch button")) {
     btn.setAttribute("aria-pressed", String(btn.dataset.lang === lang));
   }
@@ -101,11 +101,15 @@ async function fetchWithProgress(url, onProgress) {
   return bytes;
 }
 
-async function loadModel() {
-  [labels, config] = await Promise.all([
+function loadLabels() {
+  return Promise.all([
     fetch(`${MODEL_DIR}/labels.json`).then((r) => r.json()),
     fetch(`${MODEL_DIR}/config.json`).then((r) => r.json()),
-  ]);
+  ]).then(([l, c]) => { labels = l; config = c; });
+}
+
+async function loadModel() {
+  if (!labels) await loadLabels(); // retried here so a failure is shown in the status line
   renderSpeciesList();
   loadPriors(labels).then((codes) => {
     countries = codes;
@@ -603,7 +607,9 @@ for (const btn of document.querySelectorAll(".lang-switch button")) {
   });
 }
 
-// Pick the language before loading anything else, so nothing flashes in English
+// The labels are small and the page text includes how many species there are,
+// so load them first; then pick the language, so nothing flashes in English
+await loadLabels().catch(() => {});
 await setLanguage(initialLanguage());
 loadExamples().catch((err) => console.warn("Examples unavailable:", err));
 loadModel().catch((err) => {

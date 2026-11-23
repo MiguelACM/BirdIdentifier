@@ -1,18 +1,20 @@
-"""Bundle the dataset + training code into one zip to upload to Kaggle (or Colab).
+"""Bundle the dataset + training code into zips to upload to Kaggle (or Colab).
 
-The zip mirrors the ml/data folder, plus the code:
-    raw/images/...   raw/manifest.csv   splits/...   src/...
+The zips mirror the ml/data folder, plus the code:
+    part 1:      raw/images/...   raw/manifest.csv   splits/...   src/...
+    parts 2..N:  raw/images/...   (the rest of the photos)
 
-Photos are shrunk so their short side is --short-side px (default 320). The
-model trains on 224 px crops, so this loses nothing useful, makes the upload
-~3x smaller and speeds up image loading during training.
+Photos are shrunk so their short side is --short-side px (default 320). That is
+about the size of iNaturalist's 500 px "medium" photos anyway, and enough for
+288 px training crops, while it makes the upload smaller and loading faster.
 
-The zip is kept under 2 GB on purpose: beyond that Python switches to the
-ZIP64 format, which many zip readers (including Kaggle's) reject. ZIP64 is
-disabled, so the script fails loudly instead of producing an unreadable file.
+Each zip is kept under 2 GB on purpose: beyond that Python switches to the
+ZIP64 format, which many zip readers (including Kaggle's) reject. So the
+photos are spread over as many parts as needed; upload them all to the same
+Kaggle dataset.
 
 Usage (from the ml/ folder):
-    python -m src.package_dataset            # -> dist/bird-identifier-data.zip
+    python -m src.package_dataset   # -> dist/bird-identifier-data-1.zip, -2.zip, ...
 """
 
 from __future__ import annotations
@@ -46,12 +48,16 @@ def shrink(path: Path, short_side: int, quality: int) -> bytes:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--out", type=Path, default=ML_DIR / "dist" / "bird-identifier-data.zip")
+    parser.add_argument("--out-dir", type=Path, default=ML_DIR / "dist")
+    parser.add_argument("--name", default="bird-identifier-data")
+    parser.add_argument("--part-gb", type=float, default=1.9, help="max size of each zip")
     parser.add_argument("--short-side", type=int, default=320)
     parser.add_argument("--quality", type=int, default=90)
     parser.add_argument("--workers", type=int, default=os.cpu_count() or 2)
     args = parser.parse_args()
-    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out_dir.mkdir(parents=True, exist_ok=True)
+    for old in args.out_dir.glob(f"{args.name}*.zip"):
+        old.unlink()  # don't leave parts of an older, larger build lying around
 
     images = sorted(p for p in (DATA_DIR / "raw" / "images").rglob("*.jpg"))
     other: list[tuple[Path, str]] = [
@@ -64,22 +70,30 @@ def main() -> None:
     other += [(p, f"src/{p.name}") for p in sorted((ML_DIR / "src").glob("*.py"))]
 
     job = partial(shrink, short_side=args.short_side, quality=args.quality)
-    try:
-        with zipfile.ZipFile(args.out, "w", compression=zipfile.ZIP_STORED,
-                             allowZip64=False) as zf, ProcessPoolExecutor(args.workers) as pool:
-            for path, arcname in other:
-                zf.write(path, arcname)
-            for i, (path, data) in enumerate(
-                    zip(images, pool.map(job, images, chunksize=64)), 1):
-                zf.writestr(path.relative_to(DATA_DIR).as_posix(), data)
-                if i % 5000 == 0:
-                    print(f"  {i}/{len(images)} images")
-    except zipfile.LargeZipFile:
-        args.out.unlink(missing_ok=True)
-        raise SystemExit("Archive would exceed 2 GB; use a smaller --short-side or --quality.")
+    limit = int(args.part_gb * 1e9)
+    parts: list[Path] = []
 
-    n = len(images) + len(other)
-    print(f"Wrote {args.out} ({args.out.stat().st_size / 1e9:.2f} GB, {n} files)")
+    def new_part() -> zipfile.ZipFile:
+        path = args.out_dir / f"{args.name}-{len(parts) + 1}.zip"
+        parts.append(path)
+        return zipfile.ZipFile(path, "w", compression=zipfile.ZIP_STORED, allowZip64=False)
+
+    zf = new_part()
+    with ProcessPoolExecutor(args.workers) as pool:
+        for path, arcname in other:
+            zf.write(path, arcname)
+        for i, (path, data) in enumerate(zip(images, pool.map(job, images, chunksize=64)), 1):
+            if zf.fp.tell() + len(data) + 1000 > limit:  # stored, so file size ~ data written
+                zf.close()
+                zf = new_part()
+            zf.writestr(path.relative_to(DATA_DIR).as_posix(), data)
+            if i % 5000 == 0:
+                print(f"  {i}/{len(images)} images, part {len(parts)}")
+    zf.close()
+
+    for part in parts:
+        print(f"Wrote {part} ({part.stat().st_size / 1e9:.2f} GB)")
+    print(f"{len(images)} images in {len(parts)} parts")
 
 
 if __name__ == "__main__":

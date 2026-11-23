@@ -2,7 +2,7 @@
 
 For every European country and month, asks GBIF how many records there are of
 each of the model's species, then turns the counts into "how likely is each
-species here and now, among the 100 the model knows". The web app multiplies
+species here and now, among the species the model knows". The web app multiplies
 these into the model's probabilities to re-rank its guesses.
 
 Most GBIF bird records come from eBird and iNaturalist, so counts follow where
@@ -45,12 +45,26 @@ K_COUNTRY = 1000
 SCALE = 10000  # priors are stored as integers out of SCALE (min 1)
 
 
+AVES_KEY = 212  # GBIF backbone key of class Aves
+
+# iNaturalist names that GBIF's backbone doesn't know yet (newer genus moves)
+GBIF_NAMES = {
+    "Thinornis dubius": "Charadrius dubius",  # Little Ringed Plover
+    "Astur gentilis": "Accipiter gentilis",  # Eurasian Goshawk
+    "Botaurus minutus": "Ixobrychus minutus",  # Little Bittern
+    # GBIF still lumps the European Red-rumped Swallow into the Red-rumped Swallow;
+    # in Europe they are the same birds
+    "Cecropis rufula": "Cecropis daurica",
+}
+
+
 def match_species(client: INatClient, labels: list[dict]) -> list[int]:
     """Find the GBIF species key for each label by scientific name."""
     keys = []
     for label in labels:
+        name = GBIF_NAMES.get(label["scientific_name"], label["scientific_name"])
         # kingdom/class disambiguate names shared with plants (e.g. Chloris chloris)
-        m = client.get("species/match", name=label["scientific_name"], rank="SPECIES",
+        m = client.get("species/match", name=name, rank="SPECIES",
                        kingdom="Animalia", **{"class": "Aves"})
         key = m.get("acceptedUsageKey") or m.get("usageKey")
         if m.get("rank") != "SPECIES" or m.get("class") != "Aves" or not key:
@@ -71,9 +85,11 @@ def fetch_counts(client: INatClient, keys: list[int], cache_path: Path) -> dict:
             if len(counts.get(c, [])) < m]
     print(f"{len(todo)} country-months to fetch")
     for n, (country, month) in enumerate(todo, 1):
-        data = client.get("occurrence/search", taxonKey=keys, country=country, month=month,
+        # Counts for every bird species (class Aves) at once; ours are picked out below.
+        # Listing our species as taxonKey filters instead breaks past ~200 (URL too long).
+        data = client.get("occurrence/search", classKey=AVES_KEY, country=country, month=month,
                           occurrenceStatus="PRESENT", limit=0, **COUNTRY_FILTERS.get(country, {}),
-                          facet="speciesKey", facetLimit=len(keys) + 50)
+                          facet="speciesKey", facetLimit=5000)
         by_key = {int(f["name"]): f["count"] for f in data["facets"][0]["counts"]} \
             if data.get("facets") else {}
         counts.setdefault(country, []).append([by_key.get(k, 0) for k in keys])
