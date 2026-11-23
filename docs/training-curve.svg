@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 360" width="720" height="360" role="img" aria-label="Validation accuracy per epoch">
+<style>
+  .bg { fill: #fcfcfb; }
+  .grid { stroke: #e4e3df; stroke-width: 1; }
+  .axis { fill: #52514e; font: 12px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .title { fill: #0b0b0b; font: 600 15px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .label { fill: #0b0b0b; font: 600 12px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .note { fill: #52514e; font: 11px -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .session { stroke: #b5b4ae; stroke-width: 1; stroke-dasharray: 3 4; }
+  .s1 { stroke: #2a78d6; } .d1 { fill: #2a78d6; }
+  .s2 { stroke: #eb6834; } .d2 { fill: #eb6834; }
+  .ring { stroke: #fcfcfb; stroke-width: 2; }
+  @media (prefers-color-scheme: dark) {
+    .bg { fill: #1a1a19; }
+    .grid { stroke: #2f2f2d; }
+    .axis, .note { fill: #c3c2b7; }
+    .title, .label { fill: #f0efec; }
+    .session { stroke: #5a5955; }
+    .s1 { stroke: #3987e5; } .d1 { fill: #3987e5; }
+    .s2 { stroke: #d95926; } .d2 { fill: #d95926; }
+    .ring { stroke: #1a1a19; }
+  }
+</style>
+<rect class="bg" width="720" height="360" rx="12"/>
+<text class="title" x="56" y="26">Validation accuracy per epoch (300 species)</text>
+<line class="grid" x1="56" x2="600" y1="312.0" y2="312.0"/>
+<text class="axis" x="48" y="316.0" text-anchor="end">50%</text>
+<line class="grid" x1="56" x2="600" y1="252.4" y2="252.4"/>
+<text class="axis" x="48" y="256.4" text-anchor="end">60%</text>
+<line class="grid" x1="56" x2="600" y1="192.9" y2="192.9"/>
+<text class="axis" x="48" y="196.9" text-anchor="end">70%</text>
+<line class="grid" x1="56" x2="600" y1="133.3" y2="133.3"/>
+<text class="axis" x="48" y="137.3" text-anchor="end">80%</text>
+<line class="grid" x1="56" x2="600" y1="73.8" y2="73.8"/>
+<text class="axis" x="48" y="77.8" text-anchor="end">90%</text>
+<text class="axis" x="56.0" y="332" text-anchor="middle">1</text>
+<text class="axis" x="146.7" y="332" text-anchor="middle">5</text>
+<text class="axis" x="260.0" y="332" text-anchor="middle">10</text>
+<text class="axis" x="373.3" y="332" text-anchor="middle">15</text>
+<text class="axis" x="486.7" y="332" text-anchor="middle">20</text>
+<text class="axis" x="600.0" y="332" text-anchor="middle">25</text>
+<text class="axis" x="328.0" y="350" text-anchor="middle">epoch</text>
+<line class="session" x1="214.7" x2="214.7" y1="44" y2="312"/>
+<text class="note" x="218.7" y="306">session 2</text>
+<line class="session" x1="328.0" x2="328.0" y1="44" y2="312"/>
+<text class="note" x="332.0" y="306">session 3</text>
+<line class="session" x1="464.0" x2="464.0" y1="44" y2="312"/>
+<text class="note" x="468.0" y="306">session 4</text>
+<polyline class="s2" fill="none" stroke-width="2" stroke-linejoin="round" points="56.0,142.8 78.7,113.0 101.3,104.0 124.0,96.1 146.7,91.4 169.3,85.8 192.0,87.1 214.7,85.2 237.3,82.4 260.0,83.1 282.7,80.7 305.3,82.0 328.0,80.7 350.7,80.8 373.3,79.4 396.0,79.9 418.7,78.4 441.3,76.5 464.0,77.7 486.7,77.4 509.3,76.8 532.0,75.1 554.7,75.3 577.3,75.6 600.0,75.2"/>
+<text class="label" x="610.0" y="79.2">top-5</text>
+<polyline class="s1" fill="none" stroke-width="2" stroke-linejoin="round" points="56.0,300.3 78.7,253.4 101.3,235.1 124.0,220.8 146.7,217.0 169.3,206.9 192.0,199.4 214.7,198.0 237.3,190.9 260.0,190.0 282.7,182.7 305.3,184.1 328.0,178.9 350.7,174.0 373.3,173.2 396.0,170.5 418.7,167.0 441.3,162.7 464.0,161.6 486.7,157.0 509.3,155.1 532.0,155.9 554.7,153.6 577.3,154.3 600.0,154.6"/>
+<text class="label" x="610.0" y="158.6">top-1</text>
+<circle class="d1 ring" cx="554.7" cy="153.6" r="5"/>
+<text class="note" x="554.7" y="173.6" text-anchor="middle">best: 76.6% (epoch 23)</text>
+</svg>

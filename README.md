@@ -2,14 +2,41 @@
 
 [![Tests](https://github.com/MiguelACM/BirdIdentifier/actions/workflows/tests.yml/badge.svg)](https://github.com/MiguelACM/BirdIdentifier/actions/workflows/tests.yml)
 
-A learning project: identify European bird species from a photo, with the model
-running **entirely in the browser**.
+Identify **300 common European birds** from a photo. The model runs **entirely in the
+browser**, so photos never leave the device, and the app keeps working offline.
+A learning project, from collecting the data to deploying the model.
 
-**Live demo:** https://miguelacm.github.io/BirdIdentifier/
+**Try it: https://miguelacm.github.io/BirdIdentifier/**
 
-- **ML:** PyTorch + [timm](https://github.com/huggingface/pytorch-image-models), fine-tuning a pretrained image model, exported to ONNX
-- **Web:** ONNX Runtime Web (WebAssembly), so photos never leave the device
-- **Data:** research-grade bird observations from [iNaturalist](https://www.inaturalist.org/)
+<p align="center">
+  <img src="docs/screenshot-desktop.png" alt="A European Robin identified at 98%, with country and month hints" width="560">
+  &nbsp;
+  <img src="docs/screenshot-phone.jpg" alt="The app on a phone: take a photo, or try one of six example photos" width="190">
+</p>
+
+- **76.5% top-1, 89.6% top-5** on almost 15,000 test photos it never saw, across 300 species
+- **Location and season:** re-ranks look-alikes by how often each species is seen in that
+  country and month (GBIF sightings), read from the photo's GPS or picked by hand
+- **Knows when it doesn't know:** says when a photo is probably not one of its species
+- **Runs on the device:** a 16 MB int8 ONNX model in WebAssembly, about 1 s per photo
+- **Offline and installable**, with a camera button on phones; English and Portuguese
+
+## How it works
+
+```mermaid
+flowchart LR
+  A[iNaturalist<br>research-grade photos] --> B[Dataset<br>300 species x 500 photos]
+  B --> C[Fine-tune ConvNeXt-nano<br>Kaggle, 2x T4 GPUs]
+  C --> D[ONNX export<br>int8, 16 MB]
+  D --> E[Web app<br>ONNX Runtime Web]
+  G[GBIF sightings<br>per country and month] --> E
+```
+
+- **ML:** PyTorch + [timm](https://github.com/huggingface/pytorch-image-models), fine-tuning a pretrained ConvNeXt-nano, exported to ONNX
+- **Web:** plain HTML/CSS/JS with ONNX Runtime Web (WebAssembly), no build step, hosted on GitHub Pages
+- **Data:** research-grade bird observations from [iNaturalist](https://www.inaturalist.org/); sighting counts from [GBIF](https://www.gbif.org/)
+
+Screenshots use example photos from iNaturalist (CC0 / CC BY, credited in `web/examples.json`).
 
 ## Roadmap
 
@@ -42,6 +69,7 @@ ml/
     fetch_gbif_priors.py    # location + season priors from GBIF (web/priors.json)
     make_country_grid.py    # GPS -> country lookup grid (web/country-grid.json)
     predict_split.py    # save the model's predictions on a split, for evaluation
+    plot_history.py     # training-curve chart for this README (docs/)
     eval_priors.py      # measure the priors and pick their weight
     eval_unknown.py     # measure how well it spots photos of species it doesn't know
   tests/                # pytest: pipeline functions + consistency of the files in web/
@@ -61,6 +89,7 @@ web/
   examples.json         # example photos (test set, CC0/CC BY, loaded from iNaturalist)
   model/                # committed: model.int8.onnx (16 MB), labels.json, config.json
 tests/web/              # node:test tests for the web app's JavaScript helpers
+docs/                   # README images: screenshots, training curve (+ its data)
 .github/workflows/      # pages.yml deploys web/; tests.yml runs lint + tests on every push
 ```
 
@@ -130,6 +159,13 @@ python -m src.export_onnx runs/<run>/best.pt
 
 **v2:** 300 species, 500 photos each, 288px, 25 epochs on 2× T4 (about 11 minutes per
 epoch). Best validation accuracy was at epoch 23, and the last few epochs changed little:
+
+![Validation top-1 and top-5 accuracy per epoch, with the Kaggle session restarts marked](docs/training-curve.svg)
+
+The dashed lines are where a new Kaggle session resumed from the last checkpoint (see the
+memory leak note above). Each resume continued the curve without a dip. The chart is drawn by
+`python -m src.plot_history ../docs/training-history.csv --sessions 8 13 19 --out ../docs/training-curve.svg`.
+
 
 | | top-1 | top-5 |
 |---|---|---|
