@@ -80,7 +80,7 @@ async function setLanguage(newLang) {
   renderLocationControls();
   renderExamples();
   if (current.bitmap) showExampleCredit(current.example);
-  if (lastRun) showResults(lastRun.probs, lastRun.ms); // re-render, no need to re-run the model
+  if (lastRun) showResults(lastRun); // re-render, no need to re-run the model
 }
 
 // ------------------------------------------------------------------ loading
@@ -287,15 +287,16 @@ async function runModel() {
       els.timing.textContent = t("identifying");
       const t0 = performance.now();
       const output = await session.run({ image: cropToTensor(current.bitmap, current.crop) });
-      lastRun = { probs: output.probs.data, ms: performance.now() - t0 };
-      showResults(lastRun.probs, lastRun.ms);
+      // bird: the "is this a bird?" check (ml/src/bird_check.py), absent in older models
+      lastRun = { probs: output.probs.data, bird: output.bird?.data[0], ms: performance.now() - t0 };
+      showResults(lastRun);
     } while (rerun);
   } finally {
     running = false;
   }
 }
 
-function showResults(probs, ms) {
+function showResults({ probs, bird, ms }) {
   // Re-rank with the location + season prior (if a country is set)
   const prior = priorFor(place.country, place.month);
   const adjusted = applyPrior(probs, prior);
@@ -305,8 +306,12 @@ function showResults(probs, ms) {
   els.locationNote.textContent = locationNote(photoTop === top[0] ? null : labels[photoTop]);
 
   // Judged on the photo alone: a location hint can make a wrong guess look more certain
-  const unknown = probs[photoTop] < UNKNOWN_BELOW;
+  // "Not a bird" (the bird check) takes priority over "not one of my species" (low confidence)
+  const notBird = bird !== undefined && bird < (config.bird_cutoff ?? 0);
+  const unknown = notBird || probs[photoTop] < UNKNOWN_BELOW;
   els.uncertain.hidden = !unknown;
+  els.uncertain.dataset.i18n = notBird ? "notBird" : "uncertain";
+  els.uncertain.textContent = t(els.uncertain.dataset.i18n, { n: labels.length });
   els.matchesTitle.dataset.i18n = unknown ? "closestMatches" : "topMatches";
   els.matchesTitle.textContent = t(els.matchesTitle.dataset.i18n);
   els.exampleVerdict.hidden = true;
@@ -590,7 +595,7 @@ function onPlaceChange() {
     outside: false,
   });
   renderLocationControls();
-  if (lastRun) showResults(lastRun.probs, lastRun.ms); // re-rank, no need to re-run the model
+  if (lastRun) showResults(lastRun); // re-rank, no need to re-run the model
 }
 
 // ------------------------------------------------------------------ input handling

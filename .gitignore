@@ -12,6 +12,7 @@ ml/data/gbif/
 ml/data/eval/
 ml/data/geo/
 ml/data/unknown/
+ml/data/birdcheck/
 ml/data/*.log
 ml/runs/
 ml/dist/

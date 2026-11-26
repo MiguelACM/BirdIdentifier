@@ -17,7 +17,8 @@ A learning project, from collecting the data to deploying the model.
 - **76.5% top-1, 89.6% top-5** on almost 15,000 test photos it never saw, across 300 species
 - **Location and season:** re-ranks look-alikes by how often each species is seen in that
   country and month (GBIF sightings), read from the photo's GPS or picked by hand
-- **Knows when it doesn't know:** says when a photo is probably not one of its species
+- **Knows when it doesn't know:** says when a photo doesn't look like a bird, or is probably
+  not one of its species
 - **Runs on the device:** a 16 MB int8 ONNX model in WebAssembly, about 1 s per photo
 - **Offline and installable**, with a camera button on phones; English and Portuguese
 
@@ -51,6 +52,7 @@ Screenshots use example photos from iNaturalist (CC0 / CC BY, credited in `web/e
       on photos of other birds and of non-birds)
 - [x] Tests and GitHub Actions CI (lint, unit tests, model/priors/labels consistency)
 - [x] Offline and installable (service worker + web app manifest), camera button on phones
+- [x] "Is this a bird?" check: logistic regression on the model's features, a second ONNX output
 - [ ] Scale up further: about 450 European species have at least 300 iNaturalist observations
 
 ## Project layout
@@ -72,6 +74,7 @@ ml/
     plot_history.py     # training-curve chart for this README (docs/)
     eval_priors.py      # measure the priors and pick their weight
     eval_unknown.py     # measure how well it spots photos of species it doesn't know
+    bird_check.py       # "is this a bird?" check on the model's features, added to the ONNX model
   tests/                # pytest: pipeline functions + consistency of the files in web/
   notebooks/
     train_kaggle.ipynb  # runs train + export on a free Kaggle GPU
@@ -283,6 +286,36 @@ Non-birds are fairly easy to spot, but unknown birds are not: a Red-knobbed Coot
 Eurasian Coot and a Spectacled Warbler a Greater Whitethroat, at about 90% confidence. Catching more
 would need training on "other" photos as a class of their own.
 
+**Is this a bird?** The confidence cutoff above catches 71% of non-birds, but only by luck:
+nothing tells the model what a fox is. So a second, tiny model answers just that question.
+`python -m src.bird_check` (four resumable steps, all on a CPU):
+
+1. **fetch** downloads 3,000 iNaturalist photos of mammals, insects, spiders, reptiles,
+   amphibians, plants, fungi, molluscs and fish, plus 600 birds of species outside the 300
+   (they are still birds). None of them overlap the test photos above.
+2. **features** runs the deployed int8 model over them, and over 1,500 photos of the known
+   species, keeping the 640-number vector that feeds its species layer.
+3. **train** fits an L2-regularised logistic regression (NumPy, Newton's method, balanced
+   classes, regularisation picked by 5-fold cross-validation) on those 5,100 vectors.
+4. **add** appends it to `web/model/model.int8.onnx` as a second output, `bird`: one matrix
+   product, an add and a sigmoid after the features (2.8 KB). The species output is
+   byte-for-byte unchanged, so nothing has to be retrained.
+
+Below `bird_cutoff` (0.3, in `web/model/config.json`) the page says the photo doesn't look like
+a bird, still listing the closest matches. Measured on photos the check never trained on:
+
+| cutoff | known-bird photos rejected | other bird species rejected | non-birds caught | non-birds caught by either check |
+|---|---|---|---|---|
+| 0.2 | 3.2% | 6.2% | 86.8% | 92.1% |
+| **0.3** | **3.6%** | **8.4%** | **89.0%** | **93.3%** |
+| 0.5 | 4.9% | 12.1% | 92.8% | 95.5% |
+
+Only 1.2% of known-bird photos are newly flagged at 0.3; the rest were already below the 40%
+cutoff. Most of them are hardly bird photos: a single feather, a screenshot, dead birds, or a
+bird hidden in leaves. Mammals are the hardest group (81% caught at 0.5), amphibians and fungi
+the easiest (96–99%). The test set has 900 known-species photos from the validation split,
+1,197 other-bird photos and 1,050 non-birds.
+
 Six **example photos** (`web/examples.json`) let visitors try it without a photo of their own.
 They come from the test set, so the model never saw them during training, and are CC0 / CC BY
 licensed, credited and loaded from iNaturalist. With location all six are correct; without it,
@@ -320,7 +353,8 @@ node --test "tests/web/*.test.mjs"                           # JavaScript (Node 
 Besides unit tests for the pipeline (splits, GBIF smoothing, GPS-to-country, image
 preprocessing), they check that the files in `web/` belong together: the model's output size
 matches `labels.json`, and the priors, Portuguese names and example photos cover exactly the
-same species, and every file the service worker saves for offline use exists. That catches a half-updated model before visitors do.
+same species, every file the service worker saves for offline use exists, and the model has
+its `bird` output. That catches a half-updated model before visitors do.
 
 ## Data and licensing
 

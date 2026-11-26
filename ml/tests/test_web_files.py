@@ -89,3 +89,15 @@ def test_offline_files_exist():
         assert (WEB / name).is_file(), name
     for icon in load("manifest.webmanifest")["icons"]:
         assert (WEB / icon["src"]).is_file(), icon["src"]
+
+
+def test_bird_check_output(session):
+    """The "is this a bird?" check (src.bird_check) is a second output, read by app.js."""
+    assert [o.name for o in session.get_outputs()] == ["probs", "bird"]
+    config = load("model/config.json")
+    assert 0 < config["bird_cutoff"] < 1
+    size = config["img_size"]
+    x = np.random.default_rng(1).random((1, 3, size, size), dtype=np.float32)
+    bird = session.run(["bird"], {session.get_inputs()[0].name: x})[0]
+    assert bird.shape == (1, 1)
+    assert 0 <= bird[0, 0] <= 1
