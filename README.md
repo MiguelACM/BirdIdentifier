@@ -135,7 +135,8 @@ runs on Kaggle, on both of its T4s:
 3. Import `ml/notebooks/train_kaggle.ipynb` into Kaggle, attach the dataset, and turn on
    GPU T4 x2 and internet access. Then use *Save & Run All* (about 5 hours).
 4. Download `bird-model.zip` from the notebook output. It contains `model.onnx`,
-   `model.int8.onnx`, `labels.json`, `config.json` and the metrics.
+   `model.int8.onnx`, `labels.json`, `config.json`, the metrics and the `best.pt` they were
+   made from (the notebook checks that its epoch matches the test results).
 
 Two things make long Kaggle runs survivable:
 
@@ -148,7 +149,9 @@ Two things make long Kaggle runs survivable:
   DataLoader workers (they are restarted every epoch and their photo list is a numpy array)
   and not `pin_memory`; the cause was never found. `train.py` logs the container's memory
   every 200 steps and exits with code 3 after any epoch that ends above 16 GB, and the
-  notebook then restarts it from `last.pt` in a fresh process. As a last resort it stops
+  notebook then restarts it from `last.pt` in a fresh process, in the same run folder. (The
+  v2 run started a new folder on every restart, so the `best.pt` downloaded with it was from
+  an earlier restart, not the deployed model.) As a last resort it stops
   cleanly above 24 GB, still testing and exporting the best checkpoint.
 
 For a quick local check without a GPU (very slow, but tests the whole pipeline):

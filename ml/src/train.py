@@ -326,7 +326,12 @@ def main() -> None:
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, lr_factor)
     scaler = torch.amp.GradScaler(device.type, enabled=use_amp)
 
-    run_dir = args.out_dir / f"{args.model.split('.')[0]}-{time.strftime('%Y%m%d-%H%M%S')}"
+    # A restart within the same session (the notebook's memory loop) carries on in the same
+    # folder, so best.pt, last.pt and the results always end up together in one place.
+    # Resuming from somewhere else (e.g. a read-only Kaggle input) starts a new folder.
+    same_folder = args.resume is not None and args.resume.resolve().parent == args.out_dir.resolve()
+    run_dir = args.resume if same_folder else \
+        args.out_dir / f"{args.model.split('.')[0]}-{time.strftime('%Y%m%d-%H%M%S')}"
     run_dir.mkdir(parents=True, exist_ok=True)
     checkpoint_meta = {
         "model": args.model,
@@ -351,9 +356,10 @@ def main() -> None:
         scaler.load_state_dict(state["scaler"])
         history, best_top1 = state["history"], state["best_top1"]
         first_epoch = state["epoch"] + 1
-        # Copy both, so this run's folder can be resumed from even if it stops early
-        shutil.copy(args.resume / "best.pt", run_dir / "best.pt")
-        shutil.copy(args.resume / "last.pt", run_dir / "last.pt")
+        if not same_folder:
+            # Copy both, so this run's folder can be resumed from even if it stops early
+            shutil.copy(args.resume / "best.pt", run_dir / "best.pt")
+            shutil.copy(args.resume / "last.pt", run_dir / "last.pt")
         print(f"Resuming from {args.resume} after epoch {state['epoch']} (best val top-1 {best_top1:.1%})")
 
     # ---- training loop
