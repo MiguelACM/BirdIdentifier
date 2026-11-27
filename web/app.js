@@ -443,7 +443,13 @@ function showExampleVerdict(example, best) {
   els.exampleVerdict.classList.toggle("ok", correct);
   els.exampleVerdict.textContent = t(correct ? "correct" : "wrong", { species });
   els.exampleVerdict.hidden = false;
-  if (!correct) els.uncertain.hidden = true; // the verdict already explains it
+  // The verdict already says whether the answer is right, so a low-confidence warning would
+  // only contradict it (the juvenile gull is unsure on the photo alone, right with location)
+  els.uncertain.hidden = true;
+  if (correct) {
+    els.matchesTitle.dataset.i18n = "topMatches";
+    els.matchesTitle.textContent = t("topMatches");
+  }
 }
 
 function renderPrediction(r) {
