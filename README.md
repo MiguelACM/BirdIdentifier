@@ -65,13 +65,14 @@ ml/
     download_images.py  # step 2: download photos + license manifest
     make_splits.py      # step 3: deterministic train/val/test split
     package_dataset.py  # bundle data + code into < 2 GB zip parts for Kaggle
-    train.py            # step 4: fine-tune a timm model
+    train.py            # step 4: fine-tune a timm model (torchrun for several GPUs)
     export_onnx.py      # step 5: export to ONNX for the browser
     fetch_species_names.py  # species names in other languages (web/i18n/)
     fetch_gbif_priors.py    # location + season priors from GBIF (web/priors.json)
     make_country_grid.py    # GPS -> country lookup grid (web/country-grid.json)
     predict_split.py    # save the model's predictions on a split, for evaluation
     plot_history.py     # training-curve chart for this README (docs/)
+    leak_probe.py       # finds what makes training gain memory (it was nn.DataParallel)
     eval_priors.py      # measure the priors and pick their weight
     eval_unknown.py     # measure how well it spots photos of species it doesn't know
     bird_check.py       # "is this a bird?" check on the model's features, added to the ONNX model
@@ -144,15 +145,31 @@ Two things make long Kaggle runs survivable:
   stopped run's output (or a zip of its `runs/` folder) to the notebook and it carries on
   from the last finished epoch. Newer code can be added to the dataset as a small
   `code/src/` zip, so the photos don't need uploading again.
-- **A memory leak:** on Kaggle the training process gains about 1.7 MB of RAM per step
-  (~3 GB per epoch) until the container is killed, after about 8 epochs. It is not the
-  DataLoader workers (they are restarted every epoch and their photo list is a numpy array)
-  and not `pin_memory`; the cause was never found. `train.py` logs the container's memory
-  every 200 steps and exits with code 3 after any epoch that ends above 16 GB, and the
-  notebook then restarts it from `last.pt` in a fresh process, in the same run folder. (The
-  v2 run started a new folder on every restart, so the `best.pt` downloaded with it was from
-  an earlier restart, not the deployed model.) As a last resort it stops
-  cleanly above 24 GB, still testing and exporting the best checkpoint.
+- **A memory leak, found and fixed:** in v1 and v2 the training process gained about
+  1.7 MB of RAM per step on Kaggle (~3 GB per epoch) until the container was killed, after
+  about 8 epochs. It was not the DataLoader workers or `pin_memory`. `python -m src.leak_probe`
+  (an optional notebook cell) trains in short bursts with one ingredient switched off at a
+  time, on Kaggle's 2x T4:
+
+  | configuration | RAM growth per step |
+  |---|---|
+  | as in training (photos, DataLoader workers, 2 GPUs, mixed precision) | +1.63 MB |
+  | random data or one fixed batch instead of photos | +1.62 MB |
+  | without channels_last | +1.61 MB |
+  | without mixed precision (AMP) | +0.83 MB |
+  | **one GPU (no `nn.DataParallel`)** | **0.00 MB** |
+
+  The leak was in `nn.DataParallel`, which runs each GPU's share of a batch in new threads
+  on every step (Python-level allocations were tiny, so it is native memory). Training now
+  uses **DistributedDataParallel**: `torchrun` starts one process per GPU, each takes half
+  of every batch and half of the validation photos, and gradients are averaged after each
+  backward pass. Training, evaluation and restarts were checked with two processes on a CPU
+  (`gloo` backend); the first GPU run will be v3. As a safety net, `train.py` still saves and asks for a restart
+  (a `RESTART` file in its run folder) after any epoch that ends above 16 GB, and the
+  notebook carries on from `last.pt` in the same folder. (The v2 run started a new folder
+  on every restart, so the `best.pt` downloaded with it was from an earlier restart, not the
+  deployed model.) As a last resort it stops cleanly above 24 GB, still testing and
+  exporting the best checkpoint.
 
 For a quick local check without a GPU (very slow, but tests the whole pipeline):
 

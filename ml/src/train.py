@@ -9,9 +9,12 @@ Usage (from the ml/ folder, or see notebooks/train_kaggle.ipynb):
     python -m src.train --epochs 12
     python -m src.train --limit-per-class 4 --epochs 1 --batch-size 8   # quick smoke test
 
-With more than one GPU (e.g. Kaggle's 2x T4) it trains on all of them. Photos
-can be spread over several folders (the Kaggle dataset comes in parts of < 2 GB):
-pass the extra ones with --extra-image-roots.
+To train on several GPUs (e.g. Kaggle's 2x T4), start one process per GPU with torchrun:
+    torchrun --standalone --nproc_per_node=2 -m src.train ...
+(DistributedDataParallel; --batch-size is the total over all GPUs). Started without
+torchrun, it trains on a single GPU, or the CPU. Photos can be spread over several
+folders (the Kaggle dataset comes in parts of < 2 GB): pass the extra ones with
+--extra-image-roots.
 
 If a run dies part-way (e.g. Kaggle runs out of memory), restart it with
 --resume <its run folder> to carry on from the last finished epoch.
@@ -41,13 +44,59 @@ from pathlib import Path
 import numpy as np
 import timm
 import torch
+import torch.distributed as dist
 import torch.nn as nn
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset
+from torch.nn.parallel import DistributedDataParallel
+from torch.utils.data import DataLoader, Dataset, DistributedSampler, Subset
 from torchvision import transforms as T
 
 ML_DIR = Path(__file__).resolve().parent.parent
 RESTART_EXIT_CODE = 3  # "saved, please resume me in a new process" (--restart-above-gb)
+RESTART_MARKER = "RESTART"  # same request as a file in the run folder (works under torchrun too)
+
+
+# ---------------------------------------------------------------- several GPUs
+# One process per GPU (DistributedDataParallel), started by torchrun. This replaced
+# nn.DataParallel, which on Kaggle leaked ~1.6 MB of host memory per training step;
+# src/leak_probe.py showed zero growth on one GPU and the full leak with DataParallel.
+
+def setup_distributed() -> tuple[int, int, torch.device]:
+    """(rank, world size, device). A plain single process when not started by torchrun."""
+    world = int(os.environ.get("WORLD_SIZE", "1"))
+    if world == 1:
+        return 0, 1, torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        local = int(os.environ["LOCAL_RANK"])
+        torch.cuda.set_device(local)
+        device = torch.device("cuda", local)
+    else:  # lets the multi-process code be tested on a CPU
+        device = torch.device("cpu")
+    dist.init_process_group("nccl" if device.type == "cuda" else "gloo")
+    return dist.get_rank(), world, device
+
+
+def any_process(flag: bool, device: torch.device) -> bool:
+    """True if the flag is set in any process. Every process must call this at the same point."""
+    if not dist.is_initialized():
+        return flag
+    t = torch.tensor([int(flag)], device=device)
+    dist.all_reduce(t, op=dist.ReduceOp.MAX)
+    return bool(t.item())
+
+
+def from_main(value):
+    """Process 0's value, in every process (for decisions all processes must agree on)."""
+    if not dist.is_initialized():
+        return value
+    box = [value]
+    dist.broadcast_object_list(box, src=0)
+    return box[0]
+
+
+def barrier() -> None:
+    if dist.is_initialized():
+        dist.barrier()
 
 
 # ---------------------------------------------------------------- data
@@ -138,12 +187,23 @@ def evaluate(model, loader, device, criterion, use_amp: bool):
         total += labels.size(0)
         all_preds.append(topk[:, 0].cpu())
         all_labels.append(labels.cpu())
+    preds = torch.cat(all_preds).tolist() if all_preds else []
+    labels_list = torch.cat(all_labels).tolist() if all_labels else []
+    # With several processes each one scored its own share of the photos: add them up
+    stats = torch.tensor([total, loss_sum, top1, top5], dtype=torch.float64, device=device)
+    if dist.is_initialized():
+        dist.all_reduce(stats)
+        shares = [None] * dist.get_world_size()
+        dist.all_gather_object(shares, (preds, labels_list))
+        preds = [p for share in shares for p in share[0]]
+        labels_list = [y for share in shares for y in share[1]]
+    total, loss_sum, top1, top5 = stats.tolist()
     return {
         "loss": loss_sum / total,
         "top1": top1 / total,
         "top5": top5 / total,
-        "preds": torch.cat(all_preds).tolist(),
-        "labels": torch.cat(all_labels).tolist(),
+        "preds": preds,
+        "labels": labels_list,
     }
 
 
@@ -271,10 +331,14 @@ def main() -> None:
     args = p.parse_args()
     start_time = time.time()
 
+    rank, world, device = setup_distributed()
+    is_main = rank == 0
+    if not is_main:  # one copy of the log is enough; errors still go to stderr
+        sys.stdout = open(os.devnull, "w")
     torch.manual_seed(0)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     use_amp = device.type == "cuda"  # mixed precision: faster, less memory on GPU
-    print(f"Device: {device}" + (f" ({torch.cuda.get_device_name()})" if use_amp else ""))
+    print(f"Device: {device}" + (f" ({torch.cuda.get_device_name()})" if use_amp else "")
+          + (f", {world} processes (DistributedDataParallel)" if world > 1 else ""))
 
     splits_dir = args.data_dir / "splits"
     images_roots = [args.data_dir / "raw", *args.extra_image_roots]
@@ -287,11 +351,11 @@ def main() -> None:
     core = model.to(device).to(memory_format=torch.channels_last)  # the unwrapped model, for saving
     n_params = sum(p.numel() for p in core.parameters()) / 1e6
     print(f"Model: {args.model} ({n_params:.1f}M params), {len(names)} classes")
-    n_gpus = torch.cuda.device_count()
-    # DataParallel splits each batch across the GPUs: simple, and ~1.7x faster on 2 GPUs
-    model = nn.DataParallel(core) if n_gpus > 1 else core
-    if n_gpus > 1:
-        print(f"Training on {n_gpus} GPUs")
+    # DDP keeps the copies in step by averaging gradients across processes after each backward
+    model = DistributedDataParallel(core, device_ids=[device.index] if device.type == "cuda" else None) \
+        if world > 1 else core
+    if world == 1 and torch.cuda.device_count() > 1:
+        print(f"{torch.cuda.device_count()} GPUs found but using one: start with torchrun to use all")
 
     # ---- data
     train_tf, eval_tf = build_transforms(cfg, args.img_size)
@@ -301,14 +365,26 @@ def main() -> None:
     test_ds = BirdDataset(splits_dir / "test.csv", images_roots, eval_tf, lim)
     # No pin_memory: on Kaggle the main process grew ~1.6 MB per step with it on
     # (about 3 GB per epoch) until the run was killed. The speed cost is negligible here.
-    loader_kw = dict(batch_size=args.batch_size, num_workers=args.num_workers,
+    # --batch-size is the total: each process takes its share, so the training recipe is
+    # the same whatever the number of GPUs
+    loader_kw = dict(batch_size=max(1, args.batch_size // world), num_workers=args.num_workers,
                      pin_memory=use_amp and args.pin_memory)
+    # Each process trains on its own part of every epoch (reshuffled per epoch), and
+    # scores every world-th validation/test photo
+    train_sampler = DistributedSampler(train_ds, num_replicas=world, rank=rank, shuffle=True, seed=0,
+                                       drop_last=True) if world > 1 else None
+
+    def my_share(ds):
+        return Subset(ds, range(rank, len(ds), world)) if world > 1 else ds
+
     # Workers are started fresh every epoch (no persistent_workers): costs a few
     # seconds, but anything that builds up inside them is released each time
-    train_dl = DataLoader(train_ds, shuffle=True, drop_last=len(train_ds) > args.batch_size, **loader_kw)
-    val_dl = DataLoader(val_ds, **loader_kw)
-    test_dl = DataLoader(test_ds, **loader_kw)
-    print(f"Images: train {len(train_ds)}, val {len(val_ds)}, test {len(test_ds)}")
+    train_dl = DataLoader(train_ds, shuffle=train_sampler is None, sampler=train_sampler,
+                          drop_last=len(train_ds) > args.batch_size, **loader_kw)
+    val_dl = DataLoader(my_share(val_ds), **loader_kw)
+    test_dl = DataLoader(my_share(test_ds), **loader_kw)
+    print(f"Images: train {len(train_ds)}, val {len(val_ds)}, test {len(test_ds)}"
+          + (f" (batch {loader_kw['batch_size']} per process)" if world > 1 else ""))
 
     # ---- optimisation
     criterion = nn.CrossEntropyLoss(label_smoothing=args.label_smoothing)
@@ -332,7 +408,9 @@ def main() -> None:
     same_folder = args.resume is not None and args.resume.resolve().parent == args.out_dir.resolve()
     run_dir = args.resume if same_folder else \
         args.out_dir / f"{args.model.split('.')[0]}-{time.strftime('%Y%m%d-%H%M%S')}"
+    run_dir = from_main(run_dir)  # the timestamp could differ between processes
     run_dir.mkdir(parents=True, exist_ok=True)
+    (run_dir / RESTART_MARKER).unlink(missing_ok=True)  # a restart request is handled once
     checkpoint_meta = {
         "model": args.model,
         "num_classes": len(names),
@@ -356,7 +434,7 @@ def main() -> None:
         scaler.load_state_dict(state["scaler"])
         history, best_top1 = state["history"], state["best_top1"]
         first_epoch = state["epoch"] + 1
-        if not same_folder:
+        if not same_folder and is_main:
             # Copy both, so this run's folder can be resumed from even if it stops early
             shutil.copy(args.resume / "best.pt", run_dir / "best.pt")
             shutil.copy(args.resume / "last.pt", run_dir / "last.pt")
@@ -365,6 +443,8 @@ def main() -> None:
     # ---- training loop
     out_of_memory = False
     for epoch in range(first_epoch, args.epochs + 1):
+        if train_sampler is not None:
+            train_sampler.set_epoch(epoch)  # a different shuffle every epoch
         model.train()
         t0 = time.time()
         running_loss, seen = 0.0, 0
@@ -384,7 +464,8 @@ def main() -> None:
                 mem_text, mem_used = memory_summary()
                 print(f"  epoch {epoch} step {step}/{len(train_dl)} loss {running_loss / seen:.3f}"
                       + (f" | {mem_text}" if step % 200 == 0 else ""))
-                if args.max_ram_gb and mem_used > args.max_ram_gb:
+                # all processes must stop at the same step, or the other one waits forever
+                if args.max_ram_gb and any_process(mem_used > args.max_ram_gb, device):
                     out_of_memory = True
                     break
         if out_of_memory:
@@ -394,7 +475,8 @@ def main() -> None:
             break
 
         release_free_memory()
-        val = evaluate(model, val_dl, device, criterion, use_amp)
+        # the unwrapped model: each process scores its share, evaluate() adds them up
+        val = evaluate(core, val_dl, device, criterion, use_amp)
         row = {"epoch": epoch, "train_loss": running_loss / seen, "val_loss": val["loss"],
                "val_top1": val["top1"], "val_top5": val["top5"],
                "lr": optimizer.param_groups[0]["lr"], "seconds": time.time() - t0}
@@ -406,44 +488,55 @@ def main() -> None:
               f"{row['seconds']:.0f}s | {mem_text}" + ("  * best" if improved else ""))
         if improved:
             best_top1 = val["top1"]
-            torch.save({**checkpoint_meta, "epoch": epoch, "state_dict": core.state_dict()},
-                       run_dir / "best.pt")
-        # Everything needed to carry on with --resume if the run dies. Written to a
-        # temporary file first, so a crash mid-save can't leave a broken last.pt
-        torch.save({"epoch": epoch, "state_dict": core.state_dict(), "optimizer": optimizer.state_dict(),
-                    "scheduler": scheduler.state_dict(), "scaler": scaler.state_dict(),
-                    "history": history, "best_top1": best_top1}, run_dir / "last.pt.tmp")
-        os.replace(run_dir / "last.pt.tmp", run_dir / "last.pt")
-        if args.restart_above_gb and epoch < args.epochs and mem_used > args.restart_above_gb:
+            if is_main:
+                torch.save({**checkpoint_meta, "epoch": epoch, "state_dict": core.state_dict()},
+                           run_dir / "best.pt")
+        if is_main:
+            # Everything needed to carry on with --resume if the run dies. Written to a
+            # temporary file first, so a crash mid-save can't leave a broken last.pt
+            torch.save({"epoch": epoch, "state_dict": core.state_dict(), "optimizer": optimizer.state_dict(),
+                        "scheduler": scheduler.state_dict(), "scaler": scaler.state_dict(),
+                        "history": history, "best_top1": best_top1}, run_dir / "last.pt.tmp")
+            os.replace(run_dir / "last.pt.tmp", run_dir / "last.pt")
+        barrier()  # last.pt is complete before anyone acts on it
+        if from_main(bool(args.restart_above_gb and epoch < args.epochs and mem_used > args.restart_above_gb)):
             # Memory grows ~1.7 MB per step in this process on Kaggle (cause not found:
             # not the DataLoader workers, not pin_memory). A fresh process starts clean,
             # so hand over to the caller, which resumes from last.pt (see the notebook).
             print(f"Memory {mem_used:.1f} GB is over --restart-above-gb {args.restart_above_gb}: "
                   f"exiting so a fresh process can continue with --resume {run_dir}", flush=True)
+            if is_main:
+                (run_dir / RESTART_MARKER).write_text(str(epoch))
+            if dist.is_initialized():
+                dist.destroy_process_group()
+                sys.exit(0)  # torchrun reports any non-zero exit as a crash; the marker says "restart"
             sys.exit(RESTART_EXIT_CODE)
 
         elapsed_h = (time.time() - start_time) / 3600
         per_epoch_h = elapsed_h / (epoch - first_epoch + 1)
-        if args.max_hours and epoch < args.epochs and elapsed_h + per_epoch_h > args.max_hours:
+        if from_main(bool(args.max_hours and epoch < args.epochs and elapsed_h + per_epoch_h > args.max_hours)):
             print(f"Stopping after epoch {epoch}: another epoch would pass --max-hours "
                   f"{args.max_hours} ({elapsed_h:.1f} h used, {per_epoch_h * 60:.0f} min per epoch)")
             break
 
     if not history:
         raise SystemExit("No epoch finished, nothing to test or save")
-    with (run_dir / "history.csv").open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=list(history[0].keys()))
-        writer.writeheader()
-        writer.writerows(history)
+    if is_main:
+        with (run_dir / "history.csv").open("w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=list(history[0].keys()))
+            writer.writeheader()
+            writer.writerows(history)
 
     # ---- final test on the best checkpoint (the test set is used only here, once)
+    barrier()
     best = torch.load(run_dir / "best.pt", map_location=device, weights_only=False)
     core.load_state_dict(best["state_dict"])
-    test = evaluate(model, test_dl, device, criterion, use_amp)
+    test = evaluate(core, test_dl, device, criterion, use_amp)
     analysis = error_analysis(test["preds"], test["labels"], names)
     metrics = {"best_epoch": best["epoch"], "val_top1": best_top1,
                "test_top1": test["top1"], "test_top5": test["top5"], **analysis}
-    (run_dir / "metrics.json").write_text(json.dumps(metrics, indent=2, ensure_ascii=False))
+    if is_main:
+        (run_dir / "metrics.json").write_text(json.dumps(metrics, indent=2, ensure_ascii=False))
 
     print(f"\nTest (best epoch {best['epoch']}): top1 {test['top1']:.1%}  top5 {test['top5']:.1%}")
     print("Hardest species:", ", ".join(
@@ -451,6 +544,8 @@ def main() -> None:
     print("Most confused:", "; ".join(
         f"{d['true']} -> {d['predicted']} ({d['count']})" for d in analysis["most_confused"][:5]))
     print(f"Saved to {run_dir}")
+    if dist.is_initialized():
+        dist.destroy_process_group()
 
 
 if __name__ == "__main__":
