@@ -13,8 +13,14 @@ ZIP64 format, which many zip readers (including Kaggle's) reject. So the
 photos are spread over as many parts as needed; upload them all to the same
 Kaggle dataset.
 
+With --add-to-existing, the parts already in dist/ are kept (they are already on
+Kaggle) and only photos missing from them go into new parts, numbered after them.
+The first new part also carries the new splits/manifest/species lists; the notebook
+uses the splits from the highest-numbered part that has them.
+
 Usage (from the ml/ folder):
-    python -m src.package_dataset   # -> dist/bird-identifier-data-1.zip, -2.zip, ...
+    python -m src.package_dataset                      # -> dist/bird-identifier-data-1.zip, -2.zip, ...
+    python -m src.package_dataset --add-to-existing    # only new photos -> data-5.zip, ...
 """
 
 from __future__ import annotations
@@ -54,12 +60,24 @@ def main() -> None:
     parser.add_argument("--short-side", type=int, default=320)
     parser.add_argument("--quality", type=int, default=90)
     parser.add_argument("--workers", type=int, default=os.cpu_count() or 2)
+    parser.add_argument("--add-to-existing", action="store_true",
+                        help="keep the parts in --out-dir and only package photos missing from them")
     args = parser.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
-    for old in args.out_dir.glob(f"{args.name}*.zip"):
-        old.unlink()  # don't leave parts of an older, larger build lying around
+    existing = sorted(args.out_dir.glob(f"{args.name}-*.zip"), key=lambda p: int(p.stem.rsplit("-", 1)[1]))
+    already: set[str] = set()
+    if args.add_to_existing:
+        for part in existing:
+            with zipfile.ZipFile(part) as zf:
+                already.update(n for n in zf.namelist() if n.endswith(".jpg"))
+        print(f"Keeping {len(existing)} existing parts ({len(already)} photos)")
+    else:
+        for old in existing:
+            old.unlink()  # don't leave parts of an older, larger build lying around
+        existing = []
 
-    images = sorted(p for p in (DATA_DIR / "raw" / "images").rglob("*.jpg"))
+    images = sorted(p for p in (DATA_DIR / "raw" / "images").rglob("*.jpg")
+                    if p.relative_to(DATA_DIR).as_posix() not in already)
     other: list[tuple[Path, str]] = [
         (p, p.relative_to(DATA_DIR).as_posix()) for p in sorted((DATA_DIR / "splits").glob("*"))
     ]
@@ -67,6 +85,8 @@ def main() -> None:
         (DATA_DIR / "raw" / "manifest.csv", "raw/manifest.csv"),
         (DATA_DIR / "species.csv", "species.csv"),
     ]
+    if (DATA_DIR / "other_species.csv").exists():
+        other.append((DATA_DIR / "other_species.csv", "other_species.csv"))
     other += [(p, f"src/{p.name}") for p in sorted((ML_DIR / "src").glob("*.py"))]
 
     job = partial(shrink, short_side=args.short_side, quality=args.quality)
@@ -74,7 +94,7 @@ def main() -> None:
     parts: list[Path] = []
 
     def new_part() -> zipfile.ZipFile:
-        path = args.out_dir / f"{args.name}-{len(parts) + 1}.zip"
+        path = args.out_dir / f"{args.name}-{len(existing) + len(parts) + 1}.zip"
         parts.append(path)
         return zipfile.ZipFile(path, "w", compression=zipfile.ZIP_STORED, allowZip64=False)
 

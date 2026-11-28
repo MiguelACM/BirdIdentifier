@@ -72,7 +72,9 @@ def setup_distributed() -> tuple[int, int, torch.device]:
         device = torch.device("cuda", local)
     else:  # lets the multi-process code be tested on a CPU
         device = torch.device("cpu")
-    dist.init_process_group("nccl" if device.type == "cuda" else "gloo")
+    # device_id tells NCCL which GPU this process uses (and silences a barrier() warning)
+    dist.init_process_group("nccl" if device.type == "cuda" else "gloo",
+                            device_id=device if device.type == "cuda" else None)
     return dist.get_rank(), world, device
 
 

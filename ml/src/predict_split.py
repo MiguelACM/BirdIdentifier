@@ -5,7 +5,7 @@ without re-running the model each time. Preprocessing matches the web app and
 the validation transform: short side to `resize` px, centre crop `img_size` px.
 
 Usage (from the ml/ folder):
-    python -m src.predict_split val test   # -> data/eval/<split>_probs.npz
+    python -m src.predict_split val test   # -> data/eval/<split>_probs.npz (resumable)
 """
 
 from __future__ import annotations
@@ -51,15 +51,26 @@ def main() -> None:
         with open(args.data / "splits" / f"{split}.csv", newline="") as f:
             rows = list(csv.DictReader(f))
         probs = np.zeros((len(rows), session.get_outputs()[0].shape[1]), dtype=np.float32)
-        for i, row in enumerate(rows):
-            x = load_image(args.data / "raw" / row["path"], config["resize"], config["img_size"])
+        # Progress is saved every 500 photos, so a stopped run carries on where it was
+        partial = out_dir / f"{split}_probs.partial.npz"
+        start = 0
+        if partial.exists():
+            saved = np.load(partial)
+            if saved["probs"].shape == probs.shape:
+                start = int(saved["n"])
+                probs[:start] = saved["probs"][:start]
+                print(f"  {split}: continuing after {start} photos", flush=True)
+        for i in range(start, len(rows)):
+            x = load_image(args.data / "raw" / rows[i]["path"], config["resize"], config["img_size"])
             probs[i] = session.run(None, {input_name: x})[0][0]
             if (i + 1) % 500 == 0:
+                np.savez(partial, probs=probs, n=i + 1)
                 print(f"  {split}: {i + 1}/{len(rows)}", flush=True)
         labels = np.array([int(r["label"]) for r in rows])
         photo_ids = np.array([int(Path(r["path"]).stem) for r in rows])
         np.savez_compressed(out_dir / f"{split}_probs.npz", probs=probs, labels=labels,
                             photo_ids=photo_ids)
+        partial.unlink(missing_ok=True)
         top1 = (probs.argmax(1) == labels).mean()
         print(f"{split}: {len(rows)} photos, top-1 {top1:.1%}", flush=True)
 

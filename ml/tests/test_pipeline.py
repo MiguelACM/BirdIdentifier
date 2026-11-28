@@ -80,3 +80,56 @@ def test_load_image_resizes_and_centre_crops(tmp_path):
     assert x.dtype == np.float32
     # the centre crop of a 120x60 resize lands inside the white square
     assert x.min() > 0.9
+
+
+def test_make_splits_other_bird_class(tmp_path, monkeypatch):
+    """Species beyond the list form one "other" class; held-out ones only reach the test set."""
+    import csv
+    import sys
+
+    from src import make_splits
+
+    def write(path, rows):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=list(rows[0]))
+            writer.writeheader()
+            writer.writerows(rows)
+
+    write(tmp_path / "species.csv", [{"taxon_id": t, "scientific_name": f"S {t}", "common_name": f"C {t}",
+                                      "observations": 100} for t in (10, 20)])
+    write(tmp_path / "other_species.csv", [{"taxon_id": 30, "scientific_name": "O", "common_name": "O",
+                                            "observations": 5, "split": "train"},
+                                           {"taxon_id": 40, "scientific_name": "P", "common_name": "P",
+                                            "observations": 5, "split": "test"}])
+    write(tmp_path / "raw" / "manifest.csv",
+          [{"photo_id": f"{t}{i}", "observation_id": f"{t}{i}", "taxon_id": t, "path": f"images/{t}/{i}.jpg"}
+           for t in (10, 20, 30, 40) for i in range(40)])
+    monkeypatch.setattr(make_splits, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(sys, "argv", ["make_splits"])
+    make_splits.main()
+
+    labels = json.loads((tmp_path / "splits" / "labels.json").read_text())
+    assert [x["taxon_id"] for x in labels] == [10, 20, make_splits.OTHER_TAXON_ID]
+    assert labels[-1]["other"] is True
+    rows = {s: list(csv.DictReader((tmp_path / "splits" / f"{s}.csv").open())) for s in ("train", "val", "test")}
+    held_out = [r for s in rows for r in rows[s] if r["path"].startswith("images/40/")]
+    assert len(held_out) == 40 and all(r in rows["test"] for r in held_out)
+    assert all(r["label"] == "2" for r in held_out)
+    assert any(r["path"].startswith("images/30/") for r in rows["train"])
+
+
+def test_gbif_other_bird_count(tmp_path, monkeypatch):
+    """The other class counts every bird record that is not one of the listed species."""
+    from src import fetch_gbif_priors as g
+
+    class FakeClient:
+        def get(self, path, **params):
+            return {"count": 1000, "facets": [{"counts": [{"name": "1", "count": 300},
+                                                          {"name": "2", "count": 200},
+                                                          {"name": "99", "count": 500}]}]}
+
+    monkeypatch.setattr(g, "COUNTRIES", ["PT"])
+    counts = g.fetch_counts(FakeClient(), [1, 2, g.AVES_KEY], tmp_path / "cache.json")
+    assert counts["PT"][0] == [300, 200, 500]
+    assert len(counts["PT"]) == 12

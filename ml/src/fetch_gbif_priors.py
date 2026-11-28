@@ -3,7 +3,8 @@
 For every European country and month, asks GBIF how many records there are of
 each of the model's species, then turns the counts into "how likely is each
 species here and now, among the species the model knows". The web app multiplies
-these into the model's probabilities to re-rank its guesses.
+these into the model's probabilities to re-rank its guesses. If the model has an
+"other bird species" class, its count is every other bird record there and then.
 
 Most GBIF bird records come from eBird and iNaturalist, so counts follow where
 birders go. Dividing by the country-month total removes most of that effort
@@ -59,9 +60,13 @@ GBIF_NAMES = {
 
 
 def match_species(client: INatClient, labels: list[dict]) -> list[int]:
-    """Find the GBIF species key for each label by scientific name."""
+    """Find the GBIF species key for each label by scientific name. The "other bird
+    species" class gets AVES_KEY: its count is all birds minus the listed species."""
     keys = []
     for label in labels:
+        if label.get("other"):
+            keys.append(AVES_KEY)
+            continue
         name = GBIF_NAMES.get(label["scientific_name"], label["scientific_name"])
         # kingdom/class disambiguate names shared with plants (e.g. Chloris chloris)
         m = client.get("species/match", name=name, rank="SPECIES",
@@ -92,7 +97,11 @@ def fetch_counts(client: INatClient, keys: list[int], cache_path: Path) -> dict:
                           facet="speciesKey", facetLimit=5000)
         by_key = {int(f["name"]): f["count"] for f in data["facets"][0]["counts"]} \
             if data.get("facets") else {}
-        counts.setdefault(country, []).append([by_key.get(k, 0) for k in keys])
+        row = [by_key.get(k, 0) for k in keys]
+        if AVES_KEY in keys:  # "other bird species": every bird record not of a listed species
+            i = keys.index(AVES_KEY)
+            row[i] = max(0, data["count"] - sum(row) + row[i])
+        counts.setdefault(country, []).append(row)
         if n % 12 == 0 or n == len(todo):
             cache_path.write_text(json.dumps(cache))
             print(f"  {n}/{len(todo)} ({country})")

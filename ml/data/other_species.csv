@@ -1,0 +1,429 @@
+taxon_id,scientific_name,common_name,observations,split
+1581937,Tachyspiza brevipes,Levant Sparrowhawk,799,test
+4109,Puffinus yelkouan,Yelkouan Shearwater,790,train
+13974,Euplectes afer,Yellow-crowned Bishop,761,train
+1081583,Schoeniclus rusticus,Rustic Bunting,760,test
+14872,Acridotheres cristatellus,Crested Myna,740,train
+7044,Aythya collaris,Ring-necked Duck,731,test
+339594,Calidris falcinellus,Broad-billed Sandpiper,731,train
+1289480,Curruca hortensis,Western Orphean Warbler,687,train
+117027,Phylloscopus ibericus,Iberian Chiffchaff,677,test
+4361,Larus glaucoides,Iceland Gull,643,test
+1428,Numida meleagris,Helmeted Guineafowl,637,train
+1720550,Schoeniclus pusillus,Little Bunting,635,test
+13793,Ploceus melanocephalus,Black-headed Weaver,627,test
+1720558,Muscicapa tyrrhenica,Mediterranean Flycatcher,621,train
+19482,Caprimulgus ruficollis,Red-necked Nightjar,615,train
+20359,Aegolius funereus,Boreal Owl,614,test
+117028,Phylloscopus inornatus,Yellow-browed Warbler,612,train
+3919,Gallinago media,Great Snipe,592,test
+4481,Stercorarius longicaudus,Long-tailed Jaeger,574,train
+367564,Thectocercus acuticaudatus,Blue-crowned Parakeet,563,train
+204454,Acridotheres tristis,Common Myna,555,train
+15560,Leiothrix lutea,Red-billed Leiothrix,548,train
+145350,Euodice malabarica,Indian Silverbill,542,train
+2245,Merops persicus,Blue-cheeked Bee-eater,537,train
+3865,Calidris melanotos,Pectoral Sandpiper,535,train
+7030,Somateria spectabilis,King Eider,527,train
+73315,Puffinus mauretanicus,Balearic Shearwater,522,test
+116799,Acrocephalus melanopogon,Moustached Warbler,522,test
+863,Alectoris graeca,Rock Partridge,494,train
+4524,Alle alle,Dovekie,486,test
+10420,Loxia pytyopsittacus,Parrot Crossbill,460,train
+4364,Larus delawarensis,Ring-billed Gull,458,train
+117088,Pterocles orientalis,Black-bellied Sandgrouse,458,train
+14811,Sitta neumayer,Western Rock Nuthatch,448,test
+558426,Anser caerulescens,Snow Goose,444,train
+144851,Cyanistes cyanus,Azure Tit,408,test
+4605,Glareola nordmanni,Black-winged Pratincole,404,test
+3893,Tringa flavipes,Lesser Yellowlegs,403,train
+1720533,Schoeniclus aureolus,Yellow-breasted Bunting,396,test
+1289469,Curruca conspicillata,Spectacled Warbler,394,train
+4691,Falco cherrug,Saker Falcon,390,train
+367571,Psittacara mitratus,Mitred Parakeet,383,test
+144822,Poecile cinctus,Siberian Tit,360,train
+73390,Carduelis corsicana,Corsican Finch,353,test
+6994,Bucephala islandica,Barrow's Goldeneye,342,test
+9238,Serinus pusillus,Fire-fronted Serin,342,test
+4170,Hydrobates pelagicus,European Storm-Petrel,341,train
+7117,Chloephaga picta,Upland Goose,337,test
+201180,Iduna pallida,Eastern Olivaceous Warbler,331,test
+6612,Apus affinis,Little Swift,330,train
+7188,Callonetta leucophrys,Ringed Teal,319,train
+7013,Anser erythropus,Lesser White-fronted Goose,316,train
+7054,Aythya affinis,Lesser Scaup,315,train
+1287022,Alaudala heinei,Turkestan Short-toed Lark,315,train
+19339,Melopsittacus undulatus,Budgerigar,314,train
+1154,Syrmaticus reevesii,Reeves's Pheasant,297,train
+210941,Tarsiger cyanurus,Red-flanked Bluetail,268,test
+4571,Xema sabini,Sabine's Gull,265,test
+12842,Oenanthe deserti,Desert Wheatear,255,test
+4258,Phoenicopterus chilensis,Chilean Flamingo,254,test
+1289475,Curruca mystacea,Ménétries's Warbler,249,train
+2927,Streptopelia orientalis,Oriental Turtle-Dove,248,train
+7164,Polysticta stelleri,Steller's Eider,248,train
+546379,Alaudala rufescens,Mediterranean Short-toed Lark,248,train
+4259,Phoeniconaias minor,Lesser Flamingo,246,train
+116993,Nymphicus hollandicus,Cockatiel,245,test
+485176,Mareca americana,American Wigeon,241,test
+1289201,Curruca subalpina,Moltoni's Warbler,240,train
+1289622,Hydrobates leucorhous,Leach's Storm-Petrel,239,train
+10423,Loxia leucoptera,White-winged Crossbill,238,train
+145026,Cercotrichas galactotes,Rufous-tailed Scrub-Robin,238,test
+117041,Phylloscopus proregulus,Pallas's Leaf Warbler,236,test
+474332,Porphyrio poliocephalus,Gray-headed Swamphen,235,test
+117026,Phylloscopus humei,Hume's Leaf Warbler,231,test
+4866,Vanellus spinosus,Spur-winged Lapwing,229,test
+339596,Calidris subruficollis,Buff-breasted Sandpiper,221,test
+6951,Anas bahamensis,White-cheeked Pintail,218,train
+13726,Anthus richardi,Richard's Pipit,216,train
+13126,Ficedula semitorquata,Semicollared Flycatcher,213,train
+4436,Sterna dougallii,Roseate Tern,208,train
+4860,Vanellus leucurus,White-tailed Lapwing,205,train
+3873,Limnodromus scolopaceus,Long-billed Dowitcher,204,train
+850859,Oxyura jamaicensis,Ruddy Duck,197,train
+4935,Egretta gularis,Western Reef Heron,188,train
+14591,Pycnonotus jocosus,Red-whiskered Bulbul,188,test
+144808,Poecile lugubris,Sombre Tit,185,train
+367572,Psittacara erythrogenys,Red-masked Parakeet,185,test
+13724,Anthus hodgsoni,Olive-backed Pipit,181,train
+72458,Actitis macularius,Spotted Sandpiper,181,train
+1289468,Curruca sarda,Marmora's Warbler,181,test
+4893,Pluvialis dominica,American Golden-Plover,177,train
+4622,Gavia adamsii,Yellow-billed Loon,176,train
+4491,Stercorarius pomarinus,Pomarine Jaeger,174,train
+117181,Acrocephalus paludicola,Aquatic Warbler,167,train
+4657,Falco rusticolus,Gyrfalcon,166,train
+14832,Sitta whiteheadi,Corsican Nuthatch,164,test
+144925,Phylloscopus nitidus,Green Warbler,163,test
+4858,Vanellus gregarius,Sociable Lapwing,162,test
+906,Meleagris gallopavo,Wild Turkey,156,train
+201181,Iduna opaca,Western Olivaceous Warbler,156,test
+144594,Bubo scandiacus,Snowy Owl,153,train
+144502,Chroicocephalus philadelphia,Bonaparte's Gull,152,train
+558427,Anser rossii,Ross's Goose,152,test
+3866,Calidris fuscicollis,White-rumped Sandpiper,146,test
+72572,Bucanetes githagineus,Trumpeter Finch,142,test
+9210,Emberiza leucocephalos,Pine Bunting,141,test
+14110,Taeniopygia guttata,Zebra Finch,141,test
+327608,Gyps rueppelli,Rüppell's Griffon,141,test
+12023,Lanius nubicus,Masked Shrike,133,test
+12042,Lanius isabellinus,Isabelline Shrike,133,train
+59220,Branta hutchinsii,Cackling Goose,132,train
+117008,Phylloscopus borealis,Arctic Warbler,132,train
+871,Alectoris barbara,Barbary Partridge,131,train
+4555,Pagophila eburnea,Ivory Gull,129,train
+20512,Rhea americana,Greater Rhea,127,test
+7370,Melanocorypha yeltoniensis,Black Lark,126,train
+14011,Vidua macroura,Pin-tailed Whydah,123,train
+111450,Pyrrhula murina,Azores Bullfinch,122,train
+502899,Ardenna grisea,Sooty Shearwater,118,train
+558442,Mareca sibilatrix,Chiloe Wigeon,117,test
+4896,Pluvialis fulva,Pacific Golden-Plover,115,train
+475120,Ardenna gravis,Great Shearwater,113,train
+144542,Thalasseus elegans,Elegant Tern,112,test
+558433,Spatula discors,Blue-winged Teal,111,train
+6899,Dendrocygna bicolor,Fulvous Whistling-Duck,109,train
+7036,Melanitta perspicillata,Surf Scoter,108,train
+1720230,Melophus bruniceps,Red-headed Bunting,107,train
+7109,Lophodytes cucullatus,Hooded Merganser,106,test
+18998,Amazona oratrix,Yellow-headed Amazon,104,train
+3851,Calidris bairdii,Baird's Sandpiper,102,train
+19075,Agapornis fischeri,Fischer's Lovebird,100,train
+558428,Sibirionetta formosa,Baikal Teal,100,train
+145086,Turdus atrogularis,Black-throated Thrush,99,train
+3609,Geopelia cuneata,Diamond Dove,97,train
+6619,Apus caffer,White-rumped Swift,95,train
+13893,Lonchura punctulata,Scaly-breasted Munia,95,train
+1230,Chrysolophus pictus,Golden Pheasant,93,train
+19079,Agapornis roseicollis,Rosy-faced Lovebird,92,train
+117022,Phylloscopus fuscatus,Dusky Warbler,92,train
+14814,Sitta krueperi,Krüper's Nuthatch,91,train
+7029,Somateria fischeri,Spectacled Eider,89,train
+117049,Phylloscopus sindianus,Mountain Chiffchaff,89,train
+508920,Zapornia pusilla,Baillon's Crake,89,train
+2548,Megaceryle alcyon,Belted Kingfisher,88,test
+3797,Sula leucogaster,Brown Booby,87,test
+144497,Phalaropus tricolor,Wilson's Phalarope,87,train
+4246,Podilymbus podiceps,Pied-billed Grebe,80,test
+144514,Leucophaeus atricilla,Laughing Gull,78,test
+145207,Motacilla tschutschensis,Eastern Yellow Wagtail,78,train
+1289479,Curruca crassirostris,Eastern Orphean Warbler,78,train
+12999,Phoenicurus moussieri,Moussier's Redstart,77,test
+4557,Rhodostethia rosea,Ross's Gull,76,test
+6898,Dendrocygna viduata,White-faced Whistling-Duck,76,test
+6993,Bucephala albeola,Bufflehead,74,train
+12035,Lanius schach,Long-tailed Shrike,74,train
+577,Tetraogallus caucasicus,Caucasian Snowcock,72,train
+1505629,Anarhynchus leschenaultii,Greater Sand-Plover,72,train
+6893,Dendrocygna autumnalis,Black-bellied Whistling-Duck,70,test
+144433,Thalassarche melanophris,Black-browed Albatross,68,train
+558524,Alauda leucoptera,White-winged Lark,68,train
+7071,Tadorna cana,South African Shelduck,66,test
+12021,Lanius cristatus,Brown Shrike,65,train
+144515,Leucophaeus pipixcan,Franklin's Gull,65,test
+4335,Pelecanus rufescens,Pink-backed Pelican,63,test
+1289474,Curruca ruppeli,Rüppell's Warbler,63,train
+72789,Cygnus melancoryphus,Black-necked Swan,62,train
+4621,Gavia pacifica,Pacific Loon,61,train
+7416,Chersophilus duponti,Dupont's Lark,60,train
+13959,Amandava amandava,Red Avadavat,60,train
+5355,Parabuteo unicinctus,Harris's Hawk,59,train
+144543,Thalasseus bengalensis,Lesser Crested Tern,58,test
+891704,Vireo olivaceus,Red-eyed Vireo,58,test
+5020,Butorides virescens,Green Heron,57,train
+1289466,Curruca balearica,Balearic Warbler,57,train
+1720555,Schoeniclus spodocephalus,Black-faced Bunting,56,train
+3862,Calidris pusilla,Semipalmated Sandpiper,55,train
+4457,Sterna forsteri,Forster's Tern,54,test
+339680,Lanius phoenicuroides,Red-tailed Shrike,53,train
+1505899,Suthora webbiana,Vinous-throated Parrotbill,53,train
+144923,Phylloscopus orientalis,Eastern Bonelli's Warbler,51,train
+7176,Chenonetta jubata,Australian Wood Duck,50,train
+13732,Anthus rubescens,American Pipit,50,test
+73224,Phoenicurus erythrogastrus,White-winged Redstart,50,train
+4146,Oceanites oceanicus,Wilson's Storm-Petrel,47,test
+4388,Larus dominicanus,Kelp Gull,46,train
+144220,Melanitta americana,Black Scoter,46,test
+4595,Cursorius cursor,Cream-coloured Courser,45,train
+558440,Mareca falcata,Falcated Duck,45,train
+3950,Limosa haemastica,Hudsonian Godwit,44,train
+18920,Platycercus eximius,Eastern Rosella,43,train
+19076,Agapornis personatus,Yellow-collared Lovebird,43,train
+1927,Cuculus optatus,Oriental Cuckoo,42,test
+3750,Eudocimus ruber,Scarlet Ibis,42,train
+13983,Prunella montanella,Siberian Accentor,42,test
+9184,Zonotrichia albicollis,White-throated Sparrow,41,train
+558425,Anser canagicus,Emperor Goose,40,train
+8038,Corvus albus,Pied Crow,39,train
+14886,Mimus polyglottos,Northern Mockingbird,39,train
+116920,Hippolais olivetorum,Olive-tree Warbler,39,test
+6924,Anas rubripes,American Black Duck,38,train
+2966,Streptopelia roseogrisea,African Collared-Dove,37,test
+117047,Phylloscopus schwarzi,Radde's Warbler,37,test
+145087,Turdus eunomus,Dusky Thrush,37,train
+204480,Carpodacus rubicilla,Great Rosefinch,37,train
+508048,Antigone canadensis,Sandhill Crane,37,train
+3864,Calidris minutilla,Least Sandpiper,36,train
+4999,Nyctanassa violacea,Yellow-crowned Night Heron,35,test
+199840,Haemorhous mexicanus,House Finch,35,train
+144489,Tringa brevipes,Grey-tailed Tattler,34,test
+1280,Colinus virginianus,Northern Bobwhite,33,train
+6642,Apus unicolor,Plain Swift,32,test
+9607,Quiscalus mexicanus,Great-tailed Grackle,32,train
+558446,Circus hudsonius,Northern Harrier,32,train
+4817,Charadrius semipalmatus,Semipalmated Plover,31,train
+6947,Anas flavirostris,Yellow-billed Teal,31,train
+9915,Piranga rubra,Summer Tanager,31,test
+18978,Amazona aestiva,Turquoise-fronted Amazon,29,train
+1289696,Lyrurus mlokosiewiczi,Caucasian Grouse,29,train
+1409,Callipepla californica,California Quail,28,train
+4956,Ardea herodias,Great Blue Heron,28,test
+7124,Netta peposaca,Rosy-billed Pochard,28,train
+1578489,Larus smithsonianus,American Herring Gull,28,train
+162,Porzana carolina,Sora,27,train
+4793,Charadrius vociferus,Killdeer,27,train
+9211,Emberiza caesia,Cretzschmar's Bunting,27,train
+12878,Catharus ustulatus,Swainson's Thrush,27,train
+13737,Anthus godlewskii,Blyth's Pipit,27,train
+144222,Melanitta deglandi,White-winged Scoter,27,test
+1289477,Curruca nana,Asian Desert Warbler,27,train
+9346,Icterus galbula,Baltimore Oriole,25,train
+558431,Spatula versicolor,Silver Teal,25,train
+3892,Tringa melanoleuca,Greater Yellowlegs,24,test
+5363,Gyps africanus,White-backed Vulture,24,train
+10094,Junco hyemalis,Dark-eyed Junco,24,train
+19052,Poicephalus senegalus,Senegal Parrot,24,test
+201179,Iduna rama,Sykes's Warbler,24,train
+39,Grus japonensis,Red-crowned Crane,23,train
+791,Coturnix japonica,Japanese Quail,23,train
+1231,Chrysolophus amherstiae,Lady Amherst's Pheasant,22,train
+3850,Calidris himantopus,Stilt Sandpiper,22,train
+14590,Pycnonotus leucotis,White-eared Bulbul,22,train
+145064,Calliope calliope,Siberian Rubythroat,22,train
+367562,Aratinga nenday,Nanday Parakeet,22,train
+4684,Falco biarmicus,Lanner Falcon,21,train
+558434,Spatula cyanoptera,Cinnamon Teal,21,train
+3793,Sula sula,Red-footed Booby,20,train
+18903,Psittacula derbiana,Derbyan Parakeet,20,train
+19018,Ara ararauna,Blue-and-yellow Macaw,20,test
+497042,Zoothera aurea,White's Thrush,19,train
+1505906,Suthora alphonsiana,Ashy-throated Parrotbill,19,train
+13811,Ploceus castaneiceps,Taveta Golden-Weaver,18,train
+14588,Pycnonotus barbatus,Common Bulbul,18,train
+202491,Apus pacificus,Pacific Swift,18,train
+1188207,Setophaga aestiva,Northern Yellow Warbler,18,train
+7057,Aythya valisineria,Canvasback,17,test
+10227,Passerina cyanea,Indigo Bunting,17,test
+18921,Platycercus elegans,Crimson Rosella,17,train
+144527,Onychoprion anaethetus,Bridled Tern,17,train
+792869,Radjah radjah,Radjah Shelduck,17,train
+3855,Calidris mauri,Western Sandpiper,16,train
+3962,Bartramia longicauda,Upland Sandpiper,16,train
+4257,Phoenicopterus ruber,American Flamingo,16,train
+4875,Vanellus cinereus,Grey-headed Lapwing,16,test
+7104,Branta sandvicensis,Hawaiian Goose,16,test
+9100,Melospiza melodia,Song Sparrow,16,train
+10271,Pheucticus ludovicianus,Rose-breasted Grosbeak,16,test
+73149,Parkesia noveboracensis,Northern Waterthrush,16,train
+144496,Gallinago delicata,Wilson's Snipe,16,train
+1965,Coccyzus americanus,Yellow-billed Cuckoo,15,train
+10286,Mniotilta varia,Black-and-white Warbler,15,train
+145245,Setophaga coronata,Yellow-rumped Warbler,15,train
+558512,Lanius borealis,Northern Shrike,15,train
+1286913,Saxicola stejnegeri,Amur Stonechat,15,train
+1454382,Nannopterum auritum,Double-crested Cormorant,15,train
+1096,Lophura nycthemera,Silver Pheasant,14,train
+4561,Synthliboramphus antiquus,Ancient Murrelet,14,test
+8031,Corvus splendens,House Crow,14,test
+9721,Geothlypis trichas,Common Yellowthroat,14,train
+10487,Dolichonyx oryzivorus,Bobolink,14,train
+11858,Petrochelidon pyrrhonota,Cliff Swallow,14,train
+13887,Lonchura striata,White-rumped Munia,14,test
+144525,Onychoprion fuscatus,Sooty Tern,14,test
+980095,Trichoglossus moluccanus,Rainbow Lorikeet,14,train
+2413,Dacelo novaeguineae,Laughing Kookaburra,13,test
+116939,Locustella lanceolata,Lanceolated Warbler,13,test
+145233,Setophaga americana,Northern Parula,13,train
+145240,Setophaga striata,Blackpoll Warbler,13,test
+1720368,Schoeniclus pallasi,Pallas's Bunting,13,train
+4134,Bulweria bulwerii,Bulwer's Petrel,12,train
+4601,Glareola maldivarum,Oriental Pratincole,12,train
+7182,Amazonetta brasiliensis,Brazilian Teal,12,train
+12883,Catharus minimus,Gray-cheeked Thrush,12,train
+19152,Pyrrhura molinae,Green-cheeked Parakeet,12,train
+116759,Cacatua sulphurea,Yellow-crested Cockatoo,12,train
+144523,Larus armenicus,Armenian Gull,12,test
+12727,Turdus migratorius,American Robin,11,train
+72992,Padda oryzivora,Java Sparrow,11,test
+1289616,Hydrobates monteiroi,Monteiro's Storm-Petrel,11,train
+1720300,Fringillaria sahari,House Bunting,11,train
+473,Fulica americana,American Coot,10,train
+3852,Calidris tenuirostris,Great Knot,10,train
+3854,Calidris ruficollis,Red-necked Stint,10,test
+3875,Tringa solitaria,Solitary Sandpiper,10,test
+9921,Piranga olivacea,Scarlet Tanager,10,train
+12832,Oenanthe leucopyga,White-crowned Wheatear,10,train
+19577,Chordeiles minor,Common Nighthawk,10,test
+144233,Melanitta stejnegeri,Stejneger's Scoter,10,train
+199916,Setophaga caerulescens,Black-throated Blue Warbler,10,train
+367658,Phylloscopus plumbeitarsus,Two-barred Warbler,10,train
+558432,Spatula puna,Puna Teal,10,test
+1188213,Numenius hudsonicus,Hudsonian Whimbrel,10,train
+1505622,Anarhynchus asiaticus,Caspian Plover,10,train
+53,Balearica regulorum,Gray Crowned-Crane,9,train
+3751,Eudocimus albus,White Ibis,9,train
+3844,Calidris acuminata,Sharp-tailed Sandpiper,9,train
+3848,Calidris subminuta,Long-toed Stint,9,train
+4940,Egretta thula,Snowy Egret,9,train
+7070,Tadorna tadornoides,Australian Shelduck,9,train
+13989,Prunella atrogularis,Black-throated Accentor,9,train
+68499,Psittacula cyanocephala,Plum-headed Parakeet,9,train
+145235,Setophaga magnolia,Magnolia Warbler,9,train
+522,Porphyrio alleni,Allen's Gallinule,8,test
+6965,Anas undulata,Yellow-billed Duck,8,test
+10247,Setophaga ruticilla,American Redstart,8,train
+10421,Loxia scotica,Scottish Crossbill,8,train
+12776,Turdus obscurus,Eyebrowed Thrush,8,train
+17364,Vireo philadelphicus,Philadelphia Vireo,8,test
+68519,Ficedula albicilla,Taiga Flycatcher,8,train
+558430,Spatula hottentota,Blue-billed Teal,8,test
+1286928,Thalasseus albididorsalis,West African Crested Tern,8,test
+1441745,Ketupa lactea,Verreaux's Eagle-Owl,8,train
+3869,Limnodromus griseus,Short-billed Dowitcher,7,test
+7166,Coscoroba coscoroba,Coscoroba Swan,7,train
+9600,Quiscalus lugubris,Carib Grackle,7,train
+13766,Estrilda troglodytes,Black-rumped Waxbill,7,train
+18982,Amazona amazonica,Orange-winged Amazon,7,test
+19269,Psittacus erithacus,Gray Parrot,7,test
+72994,Lophonetta specularioides,Crested Duck,7,train
+202471,Aratinga solstitialis,Sun Parakeet,7,train
+1289617,Hydrobates castro,Band-rumped Storm-Petrel,7,train
+1505994,Menelikornis leucotis,White-cheeked Turaco,7,train
+1580267,Anthus japonicus,Siberian Pipit,7,train
+1585428,Tauraco violaceus,Violet Turaco,7,test
+3900,Numenius minutus,Little Curlew,6,train
+4366,Larus schistisagus,Slaty-backed Gull,6,test
+4399,Larus glaucescens,Glaucous-winged Gull,6,train
+7114,Chloephaga poliocephala,Ashy-headed Goose,6,test
+9176,Zonotrichia leucophrys,White-crowned Sparrow,6,train
+12987,Muscicapa sibirica,Dark-sided Flycatcher,6,test
+14823,Sitta canadensis,Red-breasted Nuthatch,6,train
+19009,Psephotus haematonotus,Red-rumped Parrot,6,train
+62550,Seiurus aurocapilla,Ovenbird,6,train
+145231,Setophaga tigrina,Cape May Warbler,6,train
+145236,Setophaga castanea,Bay-breasted Warbler,6,train
+1720339,Schoeniclus chrysophrys,Yellow-browed Bunting,6,train
+519,Porphyrio martinica,Purple Gallinule,5,train
+3607,Geopelia striata,Zebra Dove,5,train
+4665,Falco sparverius,American Kestrel,5,train
+4732,Ciconia abdimii,Abdim's Stork,5,test
+4871,Vanellus indicus,Red-wattled Lapwing,5,test
+4937,Egretta caerulea,Little Blue Heron,5,train
+6986,Anas capensis,Cape Teal,5,train
+7116,Chloephaga rubidiceps,Ruddy-headed Goose,5,train
+9083,Cardinalis cardinalis,Northern Cardinal,5,test
+17408,Vireo griseus,White-eyed Vireo,5,train
+19003,Amazona ochrocephala,Yellow-crowned Amazon,5,train
+72494,Ammomanes cinctura,Bar-tailed Lark,5,test
+72775,Cyanochen cyanoptera,Blue-winged Goose,5,test
+72785,Cyanopica cyanus,Azure-winged Magpie,5,test
+144441,Puffinus baroli,Barolo Shearwater,5,test
+144458,Pernis ptilorhynchus,Oriental Honey-buzzard,5,train
+144560,Eolophus roseicapilla,Galah,5,train
+145229,Setophaga citrina,Hooded Warbler,5,train
+367573,Psittacara leucophthalmus,White-eyed Parakeet,5,train
+558435,Spatula platalea,Red Shoveler,5,test
+1584584,Carduelis caniceps,Gray-crowned Goldfinch,5,test
+3454,Zenaida macroura,Mourning Dove,4,train
+4715,Caracara plancus,Crested Caracara,4,test
+5212,Buteo jamaicensis,Red-tailed Hawk,4,train
+5305,Haliaeetus leucocephalus,Bald Eagle,4,test
+5312,Haliaeetus leucoryphus,Pallas's Fish-Eagle,4,train
+6988,Anas georgica,Yellow-billed Pintail,4,test
+7150,Cereopsis novaehollandiae,Cape Barren Goose,4,train
+10729,Protonotaria citrea,Prothonotary Warbler,4,train
+11935,Tachycineta bicolor,Tree Swallow,4,test
+13727,Anthus gustavi,Pechora Pipit,4,test
+19016,Ara chloropterus,Red-and-green Macaw,4,test
+19022,Ara macao,Scarlet Macaw,4,train
+19251,Polytelis anthopeplus,Regent Parrot,4,train
+19252,Polytelis swainsonii,Superb Parrot,4,test
+19265,Barnardius zonarius,Australian Ringneck,4,train
+117017,Phylloscopus coronatus,Eastern Crowned Warbler,4,train
+144787,Riparia diluta,Pale Martin,4,train
+144796,Cecropis semirufa,Rufous-chested Swallow,4,train
+145055,Larvivora sibilans,Rufous-tailed Robin,4,test
+145237,Setophaga fusca,Blackburnian Warbler,4,test
+514125,Oressochen jubatus,Orinoco Goose,4,train
+979799,Phonipara canora,Cuban Grassquit,4,train
+1423852,Oenanthe seebohmi,Seebohm's Wheatear,4,train
+1505670,Icthyophaga vocifer,African Fish-Eagle,4,train
+1720337,Schoeniclus rutilus,Chestnut Bunting,4,test
+1094,Lophura swinhoii,Swinhoe's Pheasant,3,train
+3036,Columba guinea,Speckled Pigeon,3,train
+3681,Ocyphaps lophotes,Crested Pigeon,3,train
+3734,Platalea alba,African Spoonbill,3,test
+4744,Mycteria ibis,Yellow-billed Stork,3,train
+4993,Ardeola grayii,Indian Pond-Heron,3,train
+6958,Anas castanea,Chestnut Teal,3,test
+9640,Carpodacus roseus,Pallas's Rosefinch,3,test
+12910,Saxicola caprata,Pied Bushchat,3,train
+13796,Ploceus cucullatus,Village Weaver,3,train
+14593,Pycnonotus cafer,Red-vented Bulbul,3,test
+14995,Dumetella carolinensis,Gray Catbird,3,train
+17394,Vireo gilvus,Eastern Warbling Vireo,3,train
+18879,Neophema splendida,Scarlet-chested Parrot,3,train
+19077,Agapornis nigrigenis,Black-cheeked Lovebird,3,train
+19347,Cyanoliseus patagonus,Burrowing Parakeet,3,train
+144296,Stercorarius maccormicki,South Polar Skua,3,train
+144539,Thalasseus maximus,Royal Tern,3,train
+145239,Setophaga pensylvanica,Chestnut-sided Warbler,3,test
+201031,Leptoptilos crumenifer,Marabou Stork,3,train
+979756,Leiothlypis peregrina,Tennessee Warbler,3,train
+1289379,Chloebia gouldiae,Gouldian Finch,3,train
+1289388,Corthylio calendula,Ruby-crowned Kinglet,3,test
+1289501,Helopsaltes certhiola,Pallas's Grasshopper Warbler,3,train
+1432779,Daptrius chimachima,Yellow-headed Caracara,3,test
+1578960,Botaurus exilis,Least Bittern,3,train
+1579016,Astur atricapillus,American Goshawk,3,test
